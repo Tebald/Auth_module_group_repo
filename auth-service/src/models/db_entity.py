@@ -5,7 +5,7 @@ from sqlalchemy import Boolean, Column, DateTime, String, ForeignKey, JSON, Uniq
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from db.postgres import Base
+from db.postgres import Base, engine
 
 
 class UUIDMixin:
@@ -28,12 +28,10 @@ class User(UUIDMixin, Base):
     is_verified = Column(Boolean, default=False, nullable=False)
     registered_at = Column(DateTime, default=datetime.utcnow)
 
-    def __init__(
-            self,
-            email: str, hased_password: str, is_active: bool, is_superuser: bool,
-            is_verified: bool, registered_at: datetime
-    ) -> None:
+    def __init__(self, email: str, hased_password: str, is_active: bool, is_superuser: bool, is_verified: bool,
+                 registered_at: datetime) -> None:
 
+        super().__init__()
         self.email = email
         self.hased_password = self.hased_password = generate_password_hash(hased_password)
         self.is_active = is_active
@@ -42,7 +40,7 @@ class User(UUIDMixin, Base):
         self.registered_at = registered_at
 
     def check_password(self, password: str) -> bool:
-        return check_password_hash(self.password, password)
+        return check_password_hash(self.hased_password, password)
 
     def __repr__(self) -> str:
         return f'<User {self.email}>'
@@ -81,3 +79,12 @@ class LoginHistory(UUIDMixin, Base):
     location = Column(String(255))
     user_agent = Column(String(255))
 
+
+async def create_database() -> None:
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+
+async def purge_database() -> None:
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     redis_host: str = Field('127.0.0.1', env='REDIS_HOST')
     redis_port: int = Field(6380, env='REDIS_PORT')
     # Postgres
+    pg_db: str = Field('', env='PG_DB')
     pg_user: str = Field('', env='PG_USER')
     pg_password: str = Field('', env='PG_PASSWORD')
     pg_host: str = Field('127.0.0.1', env='PG_HOST')

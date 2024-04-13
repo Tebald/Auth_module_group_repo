@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from src.core.logger import setup_logging
 from src.core.api_settings import settings
 from src.db import redis_db
+from src.models.db_entity import create_database, purge_database
 
 
 setup_logging()
@@ -18,8 +19,11 @@ async def lifespan(app: FastAPI):
     # On startup events
     logging.info('Config: %s', vars(settings))
     redis_db.redis = Redis(host=settings.redis_host, port=settings.redis_port)
+    # Creating and filling DB
+    await create_database()
     yield
     # On shutdown events
+    await purge_database()
     await redis_db.redis.close()
 
 app = FastAPI(
