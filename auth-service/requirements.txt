@@ -1,0 +1,12 @@
+alembic==1.13.1
+async-timeout==4.0.3
+asyncpg==0.29.0
+fastapi==0.110.1
+pydantic==2.7.0
+pydantic-settings==2.2.1
+pydantic_core==2.18.1
+python-dotenv==1.0.1
+redis==5.0.3
+SQLAlchemy==2.0.29
+uvicorn==0.29.0
+Werkzeug==3.0.2
