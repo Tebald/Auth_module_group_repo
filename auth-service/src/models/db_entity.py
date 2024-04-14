@@ -5,7 +5,7 @@ from sqlalchemy import Boolean, Column, DateTime, String, ForeignKey, JSON, Uniq
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from db.postgres import Base, engine
+from src.db.postgres import Base, engine
 
 
 class UUIDMixin:
