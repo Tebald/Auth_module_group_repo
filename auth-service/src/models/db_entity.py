@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 
 from sqlalchemy import Boolean, Column, DateTime, String, ForeignKey, JSON, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
@@ -20,17 +20,19 @@ class User(UUIDMixin, Base):
     Class to represent DB 'users' table data model
     """
     __tablename__ = 'users'
-
     email = Column(String(255), unique=True, nullable=False)
     hased_password = Column(String(1024), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     is_superuser = Column(Boolean, default=False, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
-    registered_at = Column(DateTime, default=datetime.utcnow)
+    registered_at = Column(DateTime(timezone=True), default=datetime.now(UTC))
 
-    def __init__(self, email: str, hased_password: str, is_active: bool, is_superuser: bool, is_verified: bool,
-                 registered_at: datetime) -> None:
-
+    def __init__(self, email: str, 
+                 hased_password: str, 
+                 is_active: bool | None = None,
+                 is_superuser: bool | None = None,
+                 is_verified: bool | None = None,
+                 registered_at: datetime | None = None) -> None:
         super().__init__()
         self.email = email
         self.hased_password = self.hased_password = generate_password_hash(hased_password)
