@@ -24,11 +24,11 @@ class RegistrationService:
     ) -> (UserRegisteredResp | ValidationErrorResp):
         user_exists = await self.check_user_exists(db=db, email=user_info.email)
         if user_exists:
-            return ValidationErrorResp(result="Пользователь уже существует")
-        else:
-            result = await self.add_user(db, user_info)
-            return result
+             return ValidationErrorResp(result="Пользователь уже существует")
+        result = await self.add_user(db, user_info)
+        return result
 
+    # TODO: check password validity
     async def check_user_exists(self, db: AsyncSession, email: str) -> bool:
         statement = select(User).where(User.email == email)
         statement_result = await db.execute(statement=statement)

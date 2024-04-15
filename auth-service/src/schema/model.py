@@ -5,6 +5,7 @@ class UserRegistrationReq(BaseModel):
     email: str
     password: str
 
+# TODO: review schema, use version in auth-service/docs/openapi_auth_api_doc.yaml
 class UserRegisteredResp(BaseModel):
     result: str
     data: str
