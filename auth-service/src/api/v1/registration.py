@@ -18,6 +18,7 @@ router = APIRouter()
     "/register", 
     response_model=UserRegisteredResp | ValidationErrorResp | BadRequestResp, 
     responses={
+        status.HTTP_201_CREATED: {"model": UserRegisteredResp},
         status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorResp},
         status.HTTP_400_BAD_REQUEST: {"model": BadRequestResp},
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error"}
