@@ -4,9 +4,7 @@ from src.db.postgres import get_pg_session
 from src.services.registration import RegistrationService, get_registration_service
 from src.schema.model import (
     UserRegistrationReq,
-    UserRegisteredResp,
-    ValidationErrorResp,
-    BadRequestResp
+    UserRegisteredResp
 )
 from typing import List
 
@@ -16,18 +14,14 @@ router = APIRouter()
 
 @router.post(
     "/register", 
-    response_model=UserRegisteredResp | ValidationErrorResp | BadRequestResp, 
-    responses={
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorResp},
-        status.HTTP_400_BAD_REQUEST: {"model": BadRequestResp},
-        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error"}
-    }
+    response_model=UserRegisteredResp, 
+    status_code=status.HTTP_201_CREATED
 )
 async def register_user(
     user_data: UserRegistrationReq,
     db: AsyncSession = Depends(get_pg_session),
     registration_service: RegistrationService = Depends(get_registration_service)
-):
+) -> UserRegisteredResp:
     """
     Регистрация пользователя
     """

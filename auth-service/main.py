@@ -9,7 +9,7 @@ from src.core.logger import setup_logging
 from src.core.api_settings import settings
 from src.db import redis_db
 from src.models.db_entity import create_database, purge_database
-from src.api.v1 import registration
+from src.api.v1 import registration, admin_roles
 
 setup_logging()
 
@@ -37,6 +37,7 @@ app = FastAPI(
 )
 
 app.include_router(registration.router, prefix="/api/v1")
+app.include_router(admin_roles.router, prefix="/api/v1")
 
 if __name__ == '__main__':
     uvicorn.run(
