@@ -7,18 +7,10 @@ class UserRegistrationReq(BaseModel):
 
 # TODO: review schema, use version in auth-service/docs/openapi_auth_api_doc.yaml
 class UserRegisteredResp(BaseModel):
-    result: str
     data: str
     user_id: str
     email: str
     is_active: bool
-
-class ValidationErrorResp(BaseModel):
-    result: str
-
-class BadRequestRegResp(BaseModel):
-    result: str
-    error: str
 
 class BadRequestLoginResp(BaseModel):
     result: str
@@ -59,15 +51,18 @@ class UserAddRoleResp(BaseModel):
     user_id: str
     roles: List[dict]
 
-class RolesListResp(BaseModel):
-    result: str
-    data: List[dict]
-
 class RoleInfoResp(BaseModel):
-    result: str
-    id: str
+    role_id: str
     name: str
     permissions: List[str]
 
+class RolesListResp(BaseModel):
+    data: List[RoleInfoResp]
+
+class RoleCreateReq(BaseModel):
+    name: str
+
 class RoleCreateResp(BaseModel):
-    result: str
+    role_id: str
+    name: str
+    permissions: List[str]
