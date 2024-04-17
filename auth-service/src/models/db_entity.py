@@ -21,28 +21,28 @@ class User(UUIDMixin, Base):
     """
     __tablename__ = 'users'
     email = Column(String(255), unique=True, nullable=False)
-    hased_password = Column(String(1024), nullable=False)
+    hashed_password = Column(String(1024), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     is_superuser = Column(Boolean, default=False, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
     registered_at = Column(DateTime(timezone=True), default=datetime.now(UTC))
 
     def __init__(self, email: str, 
-                 hased_password: str, 
+                 hashed_password: str,
                  is_active: bool | None = None,
                  is_superuser: bool | None = None,
                  is_verified: bool | None = None,
                  registered_at: datetime | None = None) -> None:
         super().__init__()
         self.email = email
-        self.hased_password = self.hased_password = generate_password_hash(hased_password)
+        self.hashed_password = self.hashed_password = generate_password_hash(hashed_password)
         self.is_active = is_active
         self.is_superuser = is_superuser
         self.is_verified = is_verified
         self.registered_at = registered_at
 
-    def check_password(self, password: str) -> bool:
-        return check_password_hash(self.hased_password, password)
+    async def check_password(self, password: str) -> bool:
+        return check_password_hash(self.hashed_password, password)
 
     def __repr__(self) -> str:
         return f'<User {self.email}>'

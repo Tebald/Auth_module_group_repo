@@ -24,7 +24,7 @@ class RegistrationService:
     ) -> (UserRegisteredResp | ValidationErrorResp):
         user_exists = await self.check_user_exists(db=db, email=user_info.email)
         if user_exists:
-             return ValidationErrorResp(result="Пользователь уже существует")
+            return ValidationErrorResp(result="Пользователь уже существует")
         result = await self.add_user(db, user_info)
         return result
 
@@ -40,13 +40,12 @@ class RegistrationService:
         db: AsyncSession,
         user_info: UserRegistrationReq
     ) -> (UserRegisteredResp | ValidationErrorResp):
-        user = User(email = user_info.email, hased_password=user_info.password)
+        user = User(email=user_info.email, hashed_password=user_info.password)
         db.add(user)
         await db.commit()
         await db.refresh(user)
         return UserRegisteredResp(
-            result="TBD", 
-            data="TBD", 
+            result="TBD",
             user_id=str(user.id),
             email=user.email,
             is_active=user.is_active

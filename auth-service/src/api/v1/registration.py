@@ -15,7 +15,8 @@ router = APIRouter()
 
 
 @router.post(
-    "/register", 
+    "/register",
+    status_code=201,
     response_model=UserRegisteredResp | ValidationErrorResp | BadRequestResp, 
     responses={
         status.HTTP_422_UNPROCESSABLE_ENTITY: {"model": ValidationErrorResp},

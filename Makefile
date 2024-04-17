@@ -1,4 +1,4 @@
-.PHONY: prod-up prod-down tests-up tests-down
+.PHONY: prod-up prod-down tests-up tests-down local-up local-down
 
 
 prod-up:
@@ -12,3 +12,9 @@ tests-up:
 
 tests-down:
 	@docker compose -f docker-compose.tests.yml down
+
+local-up:
+	@docker compose -f docker-compose.local.yml up -d
+
+local-down:
+	@docker compose -f docker-compose.local.yml down
