@@ -5,6 +5,7 @@ from sqlalchemy.sql import select, delete, insert
 from sqlalchemy import text, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
+
 from src.schema.model import (
     RoleCreateReq,
     RoleCreateResp,
@@ -102,6 +103,7 @@ class AdminRolesService(Generic[T]):
             statement_role_permission = select(RolePermission).where(RolePermission.role_id == role.id)
             statement_role_permission_result = await db.execute(statement_role_permission)
             role_permissions = statement_role_permission_result.scalars()
+
             roles_data.append(
                 RoleInfoResp(
                     role_id = str(role.id),
@@ -114,6 +116,7 @@ class AdminRolesService(Generic[T]):
                             ).name
                         ) for rp in role_permissions
                     ]
+
                 )
             )
         return RolesListResp(data=roles_data)
