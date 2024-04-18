@@ -1,8 +1,9 @@
+import datetime
 import uuid
+from typing import List
+
 from fastapi import HTTPException
 from pydantic import BaseModel, Field, field_validator
-from typing import List
-import datetime
 
 
 class UserRegistrationReq(BaseModel):

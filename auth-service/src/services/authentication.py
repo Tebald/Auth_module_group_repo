@@ -1,18 +1,18 @@
+import logging
+import uuid
 from functools import lru_cache
 
-from src.schema.model import RefreshTokenData
-from src.db.redis_db import get_redis
 from fastapi import Depends
-from sqlalchemy.sql import select
-import uuid
-
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql import select
 
+from src.db.redis_db import get_redis
 from src.models.db_entity import User
+from src.schema.model import RefreshTokenData
 from src.services.jwt_token import JWTService, get_jwt_service
 from src.services.redis import RedisService, get_redis_service
+
 from .helper import AsyncCache
-import logging
 
 
 class AuthenticationService:

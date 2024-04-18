@@ -1,16 +1,16 @@
-from functools import lru_cache
+import logging
 import uuid
+from datetime import datetime, timedelta
+from functools import lru_cache
+
+from fastapi import Depends
+from jose import JWTError, jwt
 
 from schema.model import AccessTokenData, RefreshTokenData
-from src.db.redis_db import get_redis
-from datetime import timedelta, datetime
-from fastapi import Depends
-
-from jose import jwt, JWTError
 from src.core.api_settings import settings
+from src.db.redis_db import get_redis
 
 from .helper import AsyncCache
-import logging
 
 
 class JWTService:

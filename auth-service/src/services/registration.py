@@ -1,15 +1,15 @@
 from functools import lru_cache
-from src.db.redis_db import get_redis
+
 from fastapi import Depends
-from sqlalchemy.sql import select
-from sqlalchemy import text, and_
+from sqlalchemy import and_, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.schema.model import (
-    UserRegistrationReq,
-    UserRegisteredResp,
-    ValidationErrorResp
-)
+from sqlalchemy.sql import select
+
+from src.db.redis_db import get_redis
 from src.models.db_entity import User
+from src.schema.model import (UserRegisteredResp, UserRegistrationReq,
+                              ValidationErrorResp)
+
 from .helper import AsyncCache
 
 

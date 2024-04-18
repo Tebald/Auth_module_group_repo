@@ -1,10 +1,11 @@
 from functools import lru_cache
 
-from fastapi import Depends
-from redis.asyncio import Redis
-from src.db.redis_db import get_redis
 import backoff
 import requests
+from fastapi import Depends
+from redis.asyncio import Redis
+
+from src.db.redis_db import get_redis
 
 BACKOFF_SETTINGS = {
     'wait_gen': backoff.expo,

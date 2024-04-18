@@ -1,15 +1,16 @@
+import logging
+from contextlib import asynccontextmanager
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
-import logging
-from contextlib import asynccontextmanager
 
-from src.core.logger import setup_logging
+from src.api.v1 import authentication, registration
 from src.core.api_settings import settings
+from src.core.logger import setup_logging
 from src.db import redis_db
 from src.models.db_entity import create_database, purge_database
-from src.api.v1 import registration, authentication
 
 setup_logging()
 

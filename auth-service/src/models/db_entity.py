@@ -1,7 +1,8 @@
 import uuid
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, Column, DateTime, String, ForeignKey, JSON, UniqueConstraint
+from sqlalchemy import (JSON, Boolean, Column, DateTime, ForeignKey, String,
+                        UniqueConstraint)
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 

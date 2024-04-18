@@ -1,14 +1,14 @@
-from fastapi import APIRouter, status, Depends, HTTPException, Response, Cookie
+from typing import Annotated
+
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db.postgres import get_pg_session
-from src.services.authentication import AuthenticationService, get_authentication_service
-from src.services.jwt_token import JWTService, get_jwt_service
-
 from src.schema.cookie import AccessTokenCookie, RefreshTokenCookie
-from typing import Annotated
-
+from src.services.authentication import (AuthenticationService,
+                                         get_authentication_service)
+from src.services.jwt_token import JWTService, get_jwt_service
 
 router = APIRouter()
 
