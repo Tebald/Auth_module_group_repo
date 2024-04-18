@@ -12,16 +12,27 @@ from src.schema.model import (
 )
 from typing import List
 
+
 router = APIRouter()
 
 
 def get_access_token(access_token: str = Cookie(None, alias="my_cookie")):
     if access_token is None:
-         HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, 
             detail= "Отказано в доступе. Не найден access token."
         )
     return access_token
+
+
+def check_access_token(access_token: str, db: AsyncSession):
+    # TODO: write logic here
+    is_access_token_valid = True
+    if not is_access_token_valid:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Отказано в доступе. Access Token не действителен."
+        )
 
 
 @router.get(
@@ -34,16 +45,8 @@ async def get_permissions(
     db: AsyncSession = Depends(get_pg_session),
     admin_roles_service: AdminRolesService = Depends(get_admin_roles_service)
 ) -> RolesListResp:
-    # TODO: check access token
-    is_access_token_valid = True
-    if is_access_token_valid:
-        result = await admin_roles_service.get_all_permissions(db=db)
-        return result
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Отказано в доступе. Access Token не действителен."
-        )
+    check_access_token(access_token=access_token, db=db)
+    return await admin_roles_service.get_all_permissions(db=db)
 
 
 @router.post(
@@ -57,16 +60,8 @@ async def create_permission(
     db: AsyncSession = Depends(get_pg_session),
     admin_roles_service: AdminRolesService = Depends(get_admin_roles_service)
 ) -> RoleCreateResp:
-    # TODO: check access token
-    is_access_token_valid = True
-    if is_access_token_valid:
-        result = await admin_roles_service.create_permission(db=db, permission_data=permission_data)
-        return result
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Отказано в доступе. Access Token не действителен."
-        )
+    check_access_token(access_token=access_token, db=db)
+    return await admin_roles_service.create_permission(db=db, permission_data=permission_data)
 
 
 @router.delete("/admin/permissions/{permission_name}")
@@ -76,17 +71,8 @@ async def delete_permission(
     db: AsyncSession = Depends(get_pg_session),
     admin_roles_service: AdminRolesService = Depends(get_admin_roles_service)
 ) -> None:
-    # TODO: check access token
-    is_access_token_valid = True
-    if is_access_token_valid:
-        result = await admin_roles_service.delete_permission(
-            db=db, permission_name=permission_name)
-        return result
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Отказано в доступе. Access Token не действителен."
-        )
+    check_access_token(access_token=access_token, db=db)
+    return await admin_roles_service.delete_permission(db=db, permission_name=permission_name)
 
 
 @router.get(
@@ -99,16 +85,8 @@ async def get_roles(
     db: AsyncSession = Depends(get_pg_session),
     admin_roles_service: AdminRolesService = Depends(get_admin_roles_service)
 ) -> RolesListResp:
-    # TODO: check access token
-    is_access_token_valid = True
-    if is_access_token_valid:
-        result = await admin_roles_service.get_all_roles(db=db)
-        return result
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Отказано в доступе. Access Token не действителен."
-        )
+    check_access_token(access_token=access_token, db=db)
+    return await admin_roles_service.get_all_roles(db=db)
 
 
 @router.post(
@@ -122,16 +100,8 @@ async def create_role(
     db: AsyncSession = Depends(get_pg_session),
     admin_roles_service: AdminRolesService = Depends(get_admin_roles_service)
 ) -> RoleCreateResp:
-    # TODO: check access token
-    is_access_token_valid = True
-    if is_access_token_valid:
-        result = await admin_roles_service.create_role(db=db, role_data=role_data)
-        return result
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Отказано в доступе. Access Token не действителен."
-        )
+    check_access_token(access_token=access_token, db=db)
+    return await admin_roles_service.create_role(db=db, role_data=role_data)
 
 
 @router.get(
@@ -145,16 +115,8 @@ async def get_role_permissions(
     db: AsyncSession = Depends(get_pg_session),
     admin_roles_service: AdminRolesService = Depends(get_admin_roles_service)
 ):
-    # TODO: check access token
-    is_access_token_valid = True
-    if is_access_token_valid:
-        result = await admin_roles_service.get_permissions_by_role(db=db, role_name=role_name)
-        return result
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Отказано в доступе. Access Token не действителен."
-        )
+    check_access_token(access_token=access_token, db=db)
+    return await admin_roles_service.get_permissions_by_role(db=db, role_name=role_name)
 
 
 @router.put("/admin/roles/{role_name}")
@@ -165,17 +127,8 @@ async def update_role_permissions(
     db: AsyncSession = Depends(get_pg_session),
     admin_roles_service: AdminRolesService = Depends(get_admin_roles_service)
 ) -> RoleCreateResp:
-    # TODO: check access token
-    is_access_token_valid = True
-    if is_access_token_valid:
-        result = await admin_roles_service.update_role_permissions(
-            db=db, role_name=role_name, permissions=permissions)
-        return result
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Отказано в доступе. Access Token не действителен."
-        )
+    check_access_token(access_token=access_token, db=db)
+    return await admin_roles_service.update_role_permissions(db=db, role_name=role_name, permissions=permissions)
 
 
 @router.delete("/admin/roles/{role_name}")
@@ -185,16 +138,5 @@ async def delete_permission(
     db: AsyncSession = Depends(get_pg_session),
     admin_roles_service: AdminRolesService = Depends(get_admin_roles_service)
 ) -> None:
-    # TODO: check access token
-    is_access_token_valid = True
-    if is_access_token_valid:
-        result = await admin_roles_service.delete_role(
-            db=db, role_name=role_name)
-        return result
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="Отказано в доступе. Access Token не действителен."
-        )
-
-
+    check_access_token(access_token=access_token, db=db)
+    return await admin_roles_service.delete_role(db=db, role_name=role_name)
