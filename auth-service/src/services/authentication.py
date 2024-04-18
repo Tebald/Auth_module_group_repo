@@ -1,13 +1,15 @@
 import logging
 import uuid
+from datetime import datetime
 from functools import lru_cache
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import select
+from sqlalchemy import insert
 
 from src.db.redis_db import get_redis
-from src.models.db_entity import User
+from src.models.db_entity import User, LoginHistory
 from src.schema.model import RefreshTokenData
 from src.services.jwt_token import JWTService, get_jwt_service
 from src.services.redis import RedisService, get_redis_service
@@ -34,6 +36,25 @@ class AuthenticationService:
         if not await user.check_password(password):
             return None
         return user
+
+    @staticmethod
+    async def save_login_history(db: AsyncSession, user_id: str, ip_address: str, location: str, user_agent: str) -> None:
+        """
+        Save user login info in the DB
+        """
+        statement = (
+            insert(LoginHistory).
+            values(
+                user_id=user_id,
+                timestamp=datetime.utcnow(),
+                ip_address=ip_address,
+                location=location,
+                user_agent=user_agent)
+        )
+        await db.execute(statement=statement)
+        await db.commit()
+
+        return
 
     @staticmethod
     async def generate_session_id() -> str:

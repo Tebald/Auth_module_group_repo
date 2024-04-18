@@ -1,13 +1,13 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
+import logging
 
 from src.db.postgres import get_pg_session
 from src.schema.cookie import AccessTokenCookie, RefreshTokenCookie
-from src.services.authentication import (AuthenticationService,
-                                         get_authentication_service)
+from src.services.authentication import AuthenticationService, get_authentication_service
 from src.services.jwt_token import JWTService, get_jwt_service
 
 router = APIRouter()
@@ -15,6 +15,7 @@ router = APIRouter()
 
 @router.post('/login')
 async def login_user_for_access_token_cookie(
+    request: Request,
     response: Response,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: AsyncSession = Depends(get_pg_session),
@@ -25,6 +26,8 @@ async def login_user_for_access_token_cookie(
     """
     try:
         user = await authentication_service.authenticate_user(db, form_data.username, form_data.password)
+        user_roles = []
+        # ToDo retrieve roles infor from the db.
 
     except Exception:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='internal server error')
@@ -35,11 +38,22 @@ async def login_user_for_access_token_cookie(
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='user is inactive')
 
-    access_token, refresh_token = await authentication_service.get_tokens(user_id=str(user.id), user_roles=[])
+    access_token, refresh_token = await authentication_service.get_tokens(user_id=str(user.id), user_roles=user_roles)
 
     # In production, when you have https certificate, add secure=True to the methods below.
     response.set_cookie(key=AccessTokenCookie.name, value=access_token, httponly=True)
     response.set_cookie(key=RefreshTokenCookie.name, value=refresh_token, httponly=True)
+
+    try:
+        await authentication_service.save_login_history(
+            db,
+            user_id=str(user.id),
+            ip_address=request.client.host,
+            user_agent=request.headers.get('user-agent'),
+            location=request.headers.get('location')
+        )
+    except Exception as excp:
+        logging.error('DB. Unable to save user login history: %s', excp)
 
     return
 
