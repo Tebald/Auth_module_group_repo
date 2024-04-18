@@ -56,7 +56,26 @@ class Role(UUIDMixin, Base):
     __tablename__ = 'roles'
 
     name = Column(String(1024), unique=True, nullable=False)
-    permissions = Column(JSON, default={}, nullable=False)
+
+
+class Permission(UUIDMixin, Base):
+    """
+    Class to represent DB 'permissions' table data model
+    """
+    __tablename__ = 'permissions'
+
+    name = Column(String(1024), unique=True, nullable=False)
+
+
+class RolePermission(UUIDMixin, Base):
+    """
+    Class to represent DB 'role_permissions' table data model
+    """
+    __tablename__ = 'role_permissions'
+
+    role_id = Column(UUID(as_uuid=True), ForeignKey("roles.id"), nullable=False)
+    permission_id = Column(UUID(as_uuid=True), ForeignKey("permissions.id"), nullable=False)
+    __table_args__ = (UniqueConstraint('role_id', 'permission_id', name='_role_permission_unic'),)
 
 
 class UserRole(UUIDMixin, Base):

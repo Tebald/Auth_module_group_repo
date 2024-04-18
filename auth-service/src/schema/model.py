@@ -24,19 +24,6 @@ class UserRegisteredResp(BaseModel):
     is_active: bool
 
 
-class UserLoginValidationErrorResp(HTTPException):
-    result: str
-
-
-class ValidationErrorResp(BaseModel):
-    result: str
-
-
-class BadRequestRegResp(BaseModel):
-    result: str
-    error: str
-
-
 class BadRequestLoginResp(BaseModel):
     result: str
     error: str
@@ -89,20 +76,10 @@ class UserAddRoleResp(BaseModel):
     roles: List[dict]
 
 
-class RolesListResp(BaseModel):
-    result: str
-    data: List[dict]
-
-
 class RoleInfoResp(BaseModel):
-    result: str
-    id: str
+    role_id: str
     name: str
     permissions: List[str]
-
-
-class RoleCreateResp(BaseModel):
-    result: str
 
 
 class AccessTokenData(BaseModel):
@@ -137,3 +114,15 @@ class RefreshTokenData(BaseModel):
     @field_validator('exp', mode='after')
     def exp_validate(cls, exp):
         return exp.replace(tzinfo=None)
+
+
+class RolesListResp(BaseModel):
+    data: List[RoleInfoResp]
+
+class RoleCreateReq(BaseModel):
+    name: str
+
+class RoleCreateResp(BaseModel):
+    role_id: str
+    name: str
+    permissions: List[str]

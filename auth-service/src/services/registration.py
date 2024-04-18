@@ -1,14 +1,17 @@
 from functools import lru_cache
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 from sqlalchemy import and_, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import select
 
 from src.db.redis_db import get_redis
+from src.schema.model import (
+    UserRegistrationReq,
+    UserRegisteredResp,
+    ValidationErrorResp
+)
 from src.models.db_entity import User
-from src.schema.model import (UserRegisteredResp, UserRegistrationReq,
-                              ValidationErrorResp)
 
 from .helper import AsyncCache
 
@@ -21,10 +24,14 @@ class RegistrationService:
         self,
         db: AsyncSession,
         user_info: UserRegistrationReq
-    ) -> (UserRegisteredResp | ValidationErrorResp):
+    ) -> UserRegisteredResp:
         user_exists = await self.check_user_exists(db=db, email=user_info.email)
         if user_exists:
-            return ValidationErrorResp(result="Пользователь уже существует")
+             raise HTTPException(
+                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
+                 detail="Пользователь уже существует"
+             )
+
         result = await self.add_user(db, user_info)
         return result
 
@@ -38,8 +45,8 @@ class RegistrationService:
     async def add_user(
         self, 
         db: AsyncSession,
-        user_info: UserRegistrationReq
-    ) -> (UserRegisteredResp | ValidationErrorResp):
+        user_info: UserRegistrationReq) -> UserRegisteredResp:
+
         user = User(email=user_info.email, hashed_password=user_info.password)
         db.add(user)
         await db.commit()

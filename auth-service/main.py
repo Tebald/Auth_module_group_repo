@@ -6,11 +6,12 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 
-from src.api.v1 import authentication, registration
+from src.api.v1 import authentication, registration, admin_roles
 from src.core.api_settings import settings
 from src.core.logger import setup_logging
 from src.db import redis_db
 from src.models.db_entity import create_database, purge_database
+
 
 setup_logging()
 
@@ -39,6 +40,7 @@ app = FastAPI(
 
 app.include_router(registration.router, prefix="/api/v1", tags=['Registration'])
 app.include_router(authentication.router, prefix="/api/v1", tags=['Authentication'])
+app.include_router(admin_roles.router, prefix="/api/v1")
 
 if __name__ == '__main__':
     uvicorn.run(
