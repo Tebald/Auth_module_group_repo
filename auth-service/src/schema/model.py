@@ -126,6 +126,8 @@ class RefreshTokenData(BaseModel):
     user_id: str
     iat: datetime.datetime
     exp: datetime.datetime
+    roles: list | None
+    session_id: str
 
     @field_validator('iat', mode='after')
     def iat_validate(cls, iat):

@@ -1,8 +1,9 @@
 from functools import lru_cache
+import uuid
 
 from schema.model import AccessTokenData, RefreshTokenData
 from src.db.redis_db import get_redis
-from datetime import timedelta, datetime, timezone
+from datetime import timedelta, datetime
 from fastapi import Depends
 
 from jose import jwt, JWTError
@@ -21,10 +22,24 @@ class JWTService:
     access_token_expire = settings.jwt_at_expire_minutes
     refresh_token_expire = settings.jwt_rt_expire_minutes
 
-    async def generate_token(self, token_data: [AccessTokenData or RefreshTokenData], token_expire: int) -> str:
+    async def get_token_pair(self, user_id: str, session_id: str, roles: list = None, ) -> (str, str):
+        """
+        Returns a pair of jwt tokens
+        """
+        at_payload = await self.get_access_token_payload(user_id=user_id, roles=roles)
+        rt_payload = await self.get_refresh_token_payload(user_id=user_id, roles=roles, session_id=session_id)
+        access_token = await self.generate_token(at_payload, token_expire=self.access_token_expire)
+        refresh_token = await self.generate_token(rt_payload, token_expire=self.refresh_token_expire)
 
-        token_data.exp = datetime.utcnow() + timedelta(minutes=token_expire)
-        to_encode = dict(token_data)
+        return access_token, refresh_token
+
+    async def generate_token(self, token_payload: [AccessTokenData or RefreshTokenData], token_expire: int) -> str:
+        """
+        Generates a jwt token
+        """
+
+        token_payload.exp = datetime.utcnow() + timedelta(minutes=token_expire)
+        to_encode = dict(token_payload)
 
         logging.info('Issued token: %s', to_encode)
         encoded_jwt = jwt.encode(to_encode, self.secret_key, self.algorithm)
@@ -32,23 +47,28 @@ class JWTService:
         return encoded_jwt
 
     @staticmethod
-    async def get_access_token_payload(user_id: str) -> AccessTokenData:
+    async def get_access_token_payload(user_id: str, roles: list = None) -> AccessTokenData:
         return AccessTokenData(
             user_id=user_id,
             iat=datetime.utcnow(),
             exp=datetime.utcnow(),
-            roles=None
+            roles=roles
         )
 
     @staticmethod
-    async def get_refresh_token_payload(user_id: str) -> RefreshTokenData:
+    async def get_refresh_token_payload(user_id: str, session_id: uuid, roles: list = None) -> RefreshTokenData:
         return RefreshTokenData(
             user_id=user_id,
             iat=datetime.utcnow(),
             exp=datetime.utcnow(),
+            roles=roles,
+            session_id=session_id
         )
 
-    async def verify_access_token(self, token: str) -> [AccessTokenData or False]:
+    async def verify_token(self, token: str) -> dict:
+        """
+        Verifies received jwt token and returnd decoded payload
+        """
         try:
             payload = jwt.decode(token, self.secret_key, self.algorithm)
             # We do not check token expiration time since it happens during
@@ -58,15 +78,13 @@ class JWTService:
 
             if user_id is None:
                 logging.error('Unable to find "user_id" in the "access_token". Received payload: %s', payload)
-                return False
-
-            token_data = AccessTokenData(**payload)
+                return {}
 
         except JWTError as excp:
             logging.error('The following error occured during access token decoding: %s', excp)
-            return False
+            return {}
 
-        return token_data
+        return payload
 
 
 @lru_cache()
