@@ -51,18 +51,29 @@ class UserAddRoleResp(BaseModel):
     user_id: str
     roles: List[dict]
 
+class PermissionInfoResp(BaseModel):
+    permission_id: str
+    name: str
+
+class PermissionsListResp(BaseModel):
+    data: List[PermissionInfoResp]
+
+class PermissionCreateResp(PermissionInfoResp):
+    ...
+
+class PermissionCreateReq(BaseModel):
+    name: str
+
 class RoleInfoResp(BaseModel):
     role_id: str
     name: str
-    permissions: List[str]
+    permissions: List[PermissionInfoResp]
 
 class RolesListResp(BaseModel):
     data: List[RoleInfoResp]
 
+class RoleCreateResp(RoleInfoResp):
+    ...
+
 class RoleCreateReq(BaseModel):
     name: str
-
-class RoleCreateResp(BaseModel):
-    role_id: str
-    name: str
-    permissions: List[str]
