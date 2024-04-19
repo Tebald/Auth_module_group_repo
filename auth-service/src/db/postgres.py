@@ -1,6 +1,8 @@
-from src.core.api_settings import settings
+from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
+                                    create_async_engine)
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
+
+from src.core.api_settings import settings
 
 
 # Base class for all further models

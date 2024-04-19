@@ -4,16 +4,17 @@ from src.db.postgres import get_pg_session
 from src.services.registration import RegistrationService, get_registration_service
 from src.schema.model import (
     UserRegistrationReq,
-    UserRegisteredResp
+    UserRegisteredResp,
+    BadRequestResp,
+    ValidationErrorResp
 )
-from typing import List
 
 
 router = APIRouter()
 
 
 @router.post(
-    "/register", 
+    "/register",
     response_model=UserRegisteredResp, 
     status_code=status.HTTP_201_CREATED
 )
