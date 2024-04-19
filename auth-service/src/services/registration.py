@@ -8,8 +8,7 @@ from sqlalchemy.sql import select
 from src.db.redis_db import get_redis
 from src.schema.model import (
     UserRegistrationReq,
-    UserRegisteredResp,
-    ValidationErrorResp
+    UserRegisteredResp
 )
 from src.models.db_entity import User
 
@@ -27,10 +26,10 @@ class RegistrationService:
     ) -> UserRegisteredResp:
         user_exists = await self.check_user_exists(db=db, email=user_info.email)
         if user_exists:
-             raise HTTPException(
-                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
-                 detail="Пользователь уже существует"
-             )
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail='Пользователь уже существует'
+            )
 
         result = await self.add_user(db, user_info)
         return result
@@ -43,16 +42,16 @@ class RegistrationService:
         return user is not None
 
     async def add_user(
-        self, 
-        db: AsyncSession,
-        user_info: UserRegistrationReq) -> UserRegisteredResp:
+            self,
+            db: AsyncSession,
+            user_info: UserRegistrationReq) -> UserRegisteredResp:
 
         user = User(email=user_info.email, hashed_password=user_info.password)
         db.add(user)
         await db.commit()
         await db.refresh(user)
         return UserRegisteredResp(
-            result="TBD",
+            result='TBD',
             user_id=str(user.id),
             email=user.email,
             is_active=user.is_active

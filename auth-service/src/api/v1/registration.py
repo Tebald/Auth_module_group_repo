@@ -4,9 +4,7 @@ from src.db.postgres import get_pg_session
 from src.services.registration import RegistrationService, get_registration_service
 from src.schema.model import (
     UserRegistrationReq,
-    UserRegisteredResp,
-    BadRequestResp,
-    ValidationErrorResp
+    UserRegisteredResp
 )
 
 
