@@ -3,7 +3,7 @@ import uuid
 from typing import List
 
 from fastapi import HTTPException
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, UUID4
 
 
 class UserRegistrationReq(BaseModel):
@@ -52,15 +52,19 @@ class UnauthorisedResp(BaseModel):
 
 
 class UserAccountInfoResp(BaseModel):
-    result: str
-    data: str
-    id: str
+    id: UUID4
     email: str
 
 
+class UserLoginHistory(BaseModel):
+    timestamp: datetime.datetime | None = None
+    ip_address: str | None = None
+    location: str | None = None
+    user_agent: str | None = None
+
+
 class UserLoginHistoryResp(BaseModel):
-    result: str
-    data: List[dict]
+    data: List[UserLoginHistory]
 
 
 class UserPermissionsResp(BaseModel):
