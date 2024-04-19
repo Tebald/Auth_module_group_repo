@@ -13,7 +13,7 @@ from src.services.jwt_token import JWTService, get_jwt_service
 router = APIRouter()
 
 
-@router.post('/login')
+@router.post('/login', status_code=status.HTTP_200_OK)
 async def login_user_for_access_token_cookie(
     request: Request,
     response: Response,
@@ -27,7 +27,7 @@ async def login_user_for_access_token_cookie(
     try:
         user = await authentication_service.authenticate_user(db, form_data.username, form_data.password)
         user_roles = []
-        # ToDo retrieve roles infor from the db.
+        # ToDo retrieve roles info from the db.
 
     except Exception:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='internal server error')
@@ -58,7 +58,7 @@ async def login_user_for_access_token_cookie(
     return
 
 
-@router.post('/logout', status_code=204)
+@router.post('/logout', status_code=status.HTTP_204_NO_CONTENT)
 async def logout_user(
     response: Response,
     rt_input: str = Cookie(alias=RefreshTokenCookie.name),
@@ -87,7 +87,7 @@ async def logout_user(
     return
 
 
-@router.post('/token-refresh')
+@router.post('/token-refresh', status_code=status.HTTP_200_OK)
 async def refresh_user_tokens_cookie_pair(
     response: Response,
     authentication_service: AuthenticationService = Depends(get_authentication_service),

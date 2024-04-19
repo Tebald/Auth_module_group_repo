@@ -40,7 +40,7 @@ app = FastAPI(
 
 app.include_router(registration.router, prefix="/api/v1", tags=['Registration'])
 app.include_router(authentication.router, prefix="/api/v1", tags=['Authentication'])
-app.include_router(admin_roles.router, prefix="/api/v1")
+app.include_router(admin_roles.router, prefix="/api/v1", tags=['Administrate roles'])
 
 if __name__ == '__main__':
     uvicorn.run(
