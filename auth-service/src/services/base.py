@@ -1,22 +1,12 @@
-import logging
-import uuid
-from datetime import datetime
 from functools import lru_cache
 from typing import List
 
-from fastapi import Depends
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import select
-from sqlalchemy import insert
+from sqlalchemy.sql import select, update
 
-from src.db.redis_db import get_redis
 from src.models.db_entity import User, LoginHistory
-from src.schema.model import RefreshTokenData, UserLoginHistory
-from src.services.jwt_token import JWTService, get_jwt_service
-from src.services.redis import RedisService, get_redis_service
-
-from .helper import AsyncCache
+from src.schema.model import UserLoginHistory, ResetCredentialsResp, ResetPasswordResp
 
 
 class BaseService:
@@ -36,7 +26,14 @@ class BaseService:
         return user
 
     @staticmethod
-    async def get_user_login_history(db: AsyncSession, user_id: str, limit: int = 50) -> [List[LoginHistory] | None]:
+    async def check_email_exists(db: AsyncSession, email: str) -> bool:
+        statement = select(User).where(User.email == email)
+        statement_result = await db.execute(statement=statement)
+        user = statement_result.scalar_one_or_none()
+        return user is not None
+
+    @staticmethod
+    async def get_user_login_history(db: AsyncSession, user_id: str, limit: int = 30) -> [List[LoginHistory] | None]:
         """
         Searching for a user login history in DB.
         Returns last 50 search results.
@@ -51,6 +48,30 @@ class BaseService:
         # берем каждый объект списка, декодируем в dict
         # dict распаковываем в UserLoginHistory - модель которую мы отдаем пользователю.
         return [UserLoginHistory(**jsonable_encoder(login)) for login in login_history]
+
+    @staticmethod
+    async def update_user_email(db: AsyncSession, email: str, user_id: str) -> ResetCredentialsResp:
+        statement = update(User).values(email=email).where(User.id == user_id)
+
+        await db.execute(statement=statement)
+        await db.commit()
+
+        statement = select(User.email).where(User.id == user_id)
+        statement_result = await db.execute(statement=statement)
+
+        result_email = statement_result.scalar_one_or_none()
+
+        return ResetCredentialsResp(user_id=str(user_id), field='email', value=result_email)
+
+    @staticmethod
+    async def update_user_password(db: AsyncSession, password: str, user_id: str) -> ResetPasswordResp:
+        hashed_password = await User.get_password_hashed(password)
+        statement = update(User).values(hashed_password=hashed_password).where(User.id == user_id)
+
+        await db.execute(statement=statement)
+        await db.commit()
+
+        return ResetPasswordResp(user_id=str(user_id))
 
 
 @lru_cache()

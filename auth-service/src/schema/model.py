@@ -1,18 +1,26 @@
 import datetime
 import uuid
 from typing import List
+from pydantic import EmailStr
 
-from fastapi import HTTPException
 from pydantic import BaseModel, Field, field_validator, UUID4
 
 
 class UserRegistrationReq(BaseModel):
-    email: str
+    email: EmailStr
+    password: str
+
+
+class UserResetEmailReq(BaseModel):
+    email: EmailStr
+
+
+class UserResetPasswordReq(BaseModel):
     password: str
 
 
 class UserLoginReq(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 
@@ -37,9 +45,17 @@ class InternalServerErrResp(BaseModel):
     detail: str
 
 
-class ResetCredentialsBadReqResp(BaseModel):
-    result: str
-    message: str
+class ResetCredentialsResp(BaseModel):
+    result: str = 'success'
+    user_id: str
+    field: str
+    value: str | None = None
+
+
+class ResetPasswordResp(BaseModel):
+    result: str = 'success'
+    user_id: str
+    field: str = 'password'
 
 
 class UserLoginCookie(BaseModel):

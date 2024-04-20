@@ -1,20 +1,13 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, status
-from fastapi.encoders import jsonable_encoder
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
-import logging
 
 from src.api.v1.authentication import check_access_token, get_current_active_user
 from src.db.postgres import get_pg_session
-from src.schema.cookie import AccessTokenCookie, RefreshTokenCookie
-from src.schema.model import UserAccountInfoResp, AccessTokenData, UserLoginHistory, UserLoginHistoryResp
-from src.services.authentication import AuthenticationService, get_authentication_service
+from src.schema.model import UserAccountInfoResp, AccessTokenData, UserLoginHistoryResp, \
+    UserResetEmailReq, ResetCredentialsResp, UserResetPasswordReq, ResetPasswordResp
 from src.services.base import BaseService, get_base_service
 from src.models.db_entity import User
-from src.services.jwt_token import JWTService, get_jwt_service
 
 router = APIRouter()
 
@@ -55,20 +48,60 @@ async def get_user_account_info(
 async def get_user_login_history_info(
         user_id: UUID4,
         db: AsyncSession = Depends(get_pg_session),
-
         base_service: BaseService = Depends(get_base_service),
-
         db_user: User = Depends(get_current_active_user),
-        access_token_dic: dict = Depends(check_access_token)):
+        access_token_dic: dict = Depends(check_access_token)) -> UserLoginHistoryResp:
     """
-    Returns details regarding user account
+    Returns details regarding user account.
     """
     await check_user_id(user_id, access_token_dic)
     login_history = await base_service.get_user_login_history(db, db_user.id)
 
-    logging.info('TYPE: %s. Value: %s', type(login_history), login_history)
-
     return UserLoginHistoryResp(data=login_history)
 
 
+@router.put('/account/{user_id}/reset-email',
+            status_code=status.HTTP_200_OK,
+            response_model=ResetCredentialsResp,
+            description='Reset email')
+async def update_user_email(
+        user_id: UUID4,
+        user_data: UserResetEmailReq,
+        db: AsyncSession = Depends(get_pg_session),
+        base_service: BaseService = Depends(get_base_service),
+        db_user: User = Depends(get_current_active_user),
+        access_token_dic: dict = Depends(check_access_token)) -> ResetCredentialsResp:
+    """
+    Updates user email in the DB.
+    """
+    await check_user_id(user_id, access_token_dic)
 
+    if await base_service.check_email_exists(db, user_data.email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='user with received email already exists')
+
+    result = await base_service.update_user_email(db, user_data.email, db_user.id)
+
+    return result
+
+
+@router.put('/account/{user_id}/reset-password',
+            status_code=status.HTTP_200_OK,
+            response_model=ResetPasswordResp,
+            description='Reset password')
+async def update_user_password(
+        user_id: UUID4,
+        user_data: UserResetPasswordReq,
+        db: AsyncSession = Depends(get_pg_session),
+        base_service: BaseService = Depends(get_base_service),
+        db_user: User = Depends(get_current_active_user),
+        access_token_dic: dict = Depends(check_access_token)) -> ResetPasswordResp:
+    """
+    Updates user password in the DB.
+    """
+    await check_user_id(user_id, access_token_dic)
+
+    result = await base_service.update_user_password(db, user_data.password, db_user.id)
+
+    return result
