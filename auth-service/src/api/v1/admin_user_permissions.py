@@ -21,7 +21,7 @@ async def get_user_roles_list(
         user_id: UUID4,
         db: AsyncSession = Depends(get_pg_session),
         base_service: BaseService = Depends(get_base_service),
-        db_user: User = Depends(get_superuser)):
+        su_user: User = Depends(get_superuser)):
     """
     Endpoint to get info regarding user roles.
     """
@@ -47,7 +47,7 @@ async def add_role_to_user(
         role_id: UUID4,
         db: AsyncSession = Depends(get_pg_session),
         base_service: BaseService = Depends(get_base_service),
-        db_user: User = Depends(get_superuser)):
+        su_user: User = Depends(get_superuser)):
     """
     Endpoint to add a role to a user.
     """
@@ -81,7 +81,7 @@ async def delete_role_from_user(
         role_id: UUID4,
         db: AsyncSession = Depends(get_pg_session),
         base_service: BaseService = Depends(get_base_service),
-        db_user: User = Depends(get_superuser)):
+        su_user: User = Depends(get_superuser)):
     """
     Endpoint to remove a role from a user.
     """

@@ -52,8 +52,8 @@ class AdminRolesService(Generic[T]):
         await db.commit()
         await db.refresh(permission)
         return PermissionCreateResp(
-            permission_id = str(permission.id),
-            name = permission.name
+            permission_id=str(permission.id),
+            name=permission.name
         )
 
     async def get_all_permissions(self, db: AsyncSession) -> PermissionsListResp:
@@ -63,8 +63,8 @@ class AdminRolesService(Generic[T]):
         return PermissionsListResp(
             data=[
                 PermissionInfoResp(
-                    permission_id = str(permission.id),
-                    name = permission.name
+                    permission_id=str(permission.id),
+                    name=permission.name
                 ) for permission in permissions
             ]
         )
@@ -72,26 +72,24 @@ class AdminRolesService(Generic[T]):
     async def create_role(self, db: AsyncSession, role_data: RoleCreateReq) -> RoleInfoResp:
         role_exists = await self._check_entity_exists(entity_type=Role, db=db, name=role_data.name)
         if role_exists:
-             raise HTTPException(
-                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
-                 detail="Роль уже существует"
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Роль уже существует"
              )
         result = await self.add_role(db, role_data)
         return result
 
-    async def add_role(
-        self, 
-        db: AsyncSession,
-        role_data: RoleCreateReq
-    ) -> RoleCreateResp:
-        role = Role(name = role_data.name)
+    @staticmethod
+    async def add_role(db: AsyncSession, role_data: RoleCreateReq) -> RoleCreateResp:
+
+        role = Role(name=role_data.name)
         db.add(role)
         await db.commit()
         await db.refresh(role)
         return RoleCreateResp(
-            role_id = str(role.id),
-            name = role.name,
-            permissions = []
+            role_id=str(role.id),
+            name=role.name,
+            permissions=[]
         )
 
     async def get_all_roles(self, db: AsyncSession) -> RolesListResp:
@@ -107,11 +105,11 @@ class AdminRolesService(Generic[T]):
             roles_data.append(
                 RoleInfoResp(
                     role_id = str(role.id),
-                    name = role.name,
-                    permissions = [
+                    name=role.name,
+                    permissions=[
                         PermissionInfoResp(
                             permission_id=str(rp.permission_id),
-                            name = (
+                            name=(
                                 await self._get_entity_by_id(entity_type=Permission, db=db, entity_id=rp.permission_id)
                             ).name
                         ) for rp in role_permissions
@@ -140,7 +138,6 @@ class AdminRolesService(Generic[T]):
             )
         return PermissionsListResp(data=permissions_data)
 
-
     async def update_role_permissions(
         self, db: AsyncSession, role_name: str, permissions=List[str]
     ) -> RoleInfoResp:
@@ -158,9 +155,9 @@ class AdminRolesService(Generic[T]):
         await db.commit()
         await db.refresh(role)
         return RoleInfoResp(
-            role_id = str(role.id),
-            name = role.name,
-            permissions = [
+            role_id=str(role.id),
+            name=role.name,
+            permissions=[
                 PermissionInfoResp(
                     permission_id=str(permission.id),
                     name=permission.name

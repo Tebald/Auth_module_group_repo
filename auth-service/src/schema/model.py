@@ -32,19 +32,6 @@ class UserRegisteredResp(BaseModel):
     is_active: bool
 
 
-class BadRequestLoginResp(BaseModel):
-    result: str
-    error: str
-
-
-class BadRequestResp(BaseModel):
-    detail: str
-
-
-class InternalServerErrResp(BaseModel):
-    detail: str
-
-
 class ResetCredentialsResp(BaseModel):
     result: str = 'success'
     user_id: str
@@ -56,15 +43,6 @@ class ResetPasswordResp(BaseModel):
     result: str = 'success'
     user_id: str
     field: str = 'password'
-
-
-class UserLoginCookie(BaseModel):
-    access_token: str
-    refresh_token: str
-
-
-class UnauthorisedResp(BaseModel):
-    detail: str
 
 
 class UserAccountInfoResp(BaseModel):
@@ -106,15 +84,19 @@ class UserAddRoleResp(BaseModel):
     user_id: str
     roles: List[dict]
 
+
 class PermissionInfoResp(BaseModel):
     permission_id: str
     name: str
 
+
 class PermissionsListResp(BaseModel):
     data: List[PermissionInfoResp]
 
+
 class PermissionCreateResp(PermissionInfoResp):
     ...
+
 
 class PermissionCreateReq(BaseModel):
     name: str
@@ -163,8 +145,10 @@ class RefreshTokenData(BaseModel):
 class RolesListResp(BaseModel):
     data: List[RoleInfoResp]
 
+
 class RoleCreateResp(RoleInfoResp):
     ...
+
 
 class RoleCreateReq(BaseModel):
     name: str
