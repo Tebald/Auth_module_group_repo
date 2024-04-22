@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 
+from api.v1 import admin_user_permissions
 from src.api.v1 import authentication, registration, admin_roles, personal_account
 from src.core.api_settings import settings
 from src.core.logger import setup_logging
@@ -40,8 +41,9 @@ app = FastAPI(
 
 app.include_router(registration.router, prefix="/api/v1", tags=['Registration'])
 app.include_router(authentication.router, prefix="/api/v1", tags=['Authentication'])
-app.include_router(admin_roles.router, prefix="/api/v1", tags=['Administrate roles'])
 app.include_router(personal_account.router, prefix="/api/v1", tags=['Personal account'])
+app.include_router(admin_roles.router, prefix="/api/v1", tags=['Administrate roles'])
+app.include_router(admin_user_permissions.router, prefix="/api/v1", tags=['Administrate user permissions'])
 
 
 if __name__ == '__main__':

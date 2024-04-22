@@ -65,6 +65,17 @@ async def get_current_active_user(user: Annotated[User, Depends(get_user)]) -> U
     return user
 
 
+async def get_superuser(user: Annotated[User, Depends(get_current_active_user)]) -> User:
+    """
+    Checks if received from DB user is superuser.
+    Depends on func 'get_current_active_user'.
+    """
+    if not user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+    return user
+
+
 async def check_refresh_token(
         input_token: str = Cookie(alias=RefreshTokenCookie.name),
         jwt_service: JWTService = Depends(get_jwt_service)) -> dict:

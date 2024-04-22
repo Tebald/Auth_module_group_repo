@@ -5,8 +5,9 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import select, update
 
-from src.models.db_entity import User, LoginHistory
-from src.schema.model import UserLoginHistory, ResetCredentialsResp, ResetPasswordResp
+from src.models.db_entity import User, LoginHistory, UserRole, Role
+from src.schema.model import UserLoginHistory, ResetCredentialsResp, ResetPasswordResp, UserRoles
+import logging
 
 
 class BaseService:
@@ -24,6 +25,23 @@ class BaseService:
             return None
 
         return user
+
+    @staticmethod
+    async def get_user_roles(db: AsyncSession, user_id: str) -> [List[UserRoles] | List]:
+        """
+        Searching for a user roles.
+        Returns DB User representation.
+        """
+        statement = select(Role.id, Role.name).where(UserRole.user_id == user_id, UserRole.role_id == Role.id)
+        statement_result = await db.execute(statement=statement)
+        user_roles = statement_result.all()
+        if not user_roles:
+            return []
+
+        # Возможно, я делаю это странным образом, но не нашел другого, чтобы конвертнуть
+        # объект sqlalchemy.engine.row.Row возвращаемый statement_result.all()
+        # в словарик.
+        return [UserRoles(**jsonable_encoder(role._mapping)) for role in user_roles]
 
     @staticmethod
     async def check_email_exists(db: AsyncSession, email: str) -> bool:

@@ -79,6 +79,17 @@ class UserLoginHistory(BaseModel):
     user_agent: str | None = None
 
 
+class UserRoles(BaseModel):
+    id: UUID4
+    name: str
+
+
+class UserRolesResp(BaseModel):
+    user_id: str
+    user_name: str
+    roles: UserRoles | List
+
+
 class UserLoginHistoryResp(BaseModel):
     data: List[UserLoginHistory]
 
