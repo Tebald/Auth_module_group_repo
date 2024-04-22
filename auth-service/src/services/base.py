@@ -3,7 +3,7 @@ from typing import List
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import select, update, insert
+from sqlalchemy.sql import select, update, insert, delete
 
 from src.models.db_entity import User, LoginHistory, UserRole, Role
 from src.schema.model import UserLoginHistory, ResetCredentialsResp, ResetPasswordResp, UserRoles
@@ -110,6 +110,20 @@ class BaseService:
         """
 
         statement = insert(UserRole).values(user_id=user_id, role_id=role_id)
+
+        await db.execute(statement=statement)
+        await db.commit()
+
+        result = await self.get_user_roles(db, user_id)
+
+        return result
+
+    async def remove_role_from_user(self, db: AsyncSession, user_id: str, role_id: str) -> [List[UserRoles] | List]:
+        """
+        Function to remove a role from a user.
+        """
+
+        statement = delete(UserRole).where(UserRole.user_id == user_id, UserRole.role_id == role_id)
 
         await db.execute(statement=statement)
         await db.commit()
