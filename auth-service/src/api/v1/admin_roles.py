@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, Depends, Cookie, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.v1.authentication import get_superuser
+from src.api.v1.authentication import get_superuser
 from src.models.db_entity import User
 from src.db.postgres import get_pg_session
 from src.services.admin_roles import AdminRolesService, get_admin_roles_service

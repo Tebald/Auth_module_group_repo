@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 
-from api.v1 import admin_user_permissions
+from src.api.v1 import admin_user_permissions
 from src.api.v1 import authentication, registration, admin_roles, personal_account
 from src.core.api_settings import settings
 from src.core.logger import setup_logging
