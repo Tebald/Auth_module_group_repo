@@ -3,7 +3,7 @@ from typing import List
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import select, update
+from sqlalchemy.sql import select, update, insert
 
 from src.models.db_entity import User, LoginHistory, UserRole, Role
 from src.schema.model import UserLoginHistory, ResetCredentialsResp, ResetPasswordResp, UserRoles
@@ -15,7 +15,7 @@ class BaseService:
     @staticmethod
     async def get_user_by_uuid(db: AsyncSession, user_id: str) -> [User | None]:
         """
-        Searching for a user in the DB by email field.
+        Searching for a user in the DB by uuid.
         Returns DB User representation.
         """
         statement = select(User).where(User.id == user_id)
@@ -25,6 +25,19 @@ class BaseService:
             return None
 
         return user
+
+    @staticmethod
+    async def get_role_by_uuid(db: AsyncSession, role_id: str) -> [Role | None]:
+        """
+        Searching for a role in the DB by uuid.
+        Returns DB Role representation.
+        """
+        statement = select(Role).where(Role.id == role_id)
+        statement_result = await db.execute(statement=statement)
+        role = statement_result.scalar_one_or_none()
+        if not role:
+            return None
+        return role
 
     @staticmethod
     async def get_user_roles(db: AsyncSession, user_id: str) -> [List[UserRoles] | List]:
@@ -54,7 +67,7 @@ class BaseService:
     async def get_user_login_history(db: AsyncSession, user_id: str, limit: int = 30) -> [List[LoginHistory] | None]:
         """
         Searching for a user login history in DB.
-        Returns last 50 search results.
+        Returns last 30 search results.
         """
         statement = select(LoginHistory).where(LoginHistory.user_id == user_id).limit(limit)
         statement_result = await db.execute(statement=statement)
@@ -90,6 +103,20 @@ class BaseService:
         await db.commit()
 
         return ResetPasswordResp(user_id=str(user_id))
+
+    async def assigne_role_to_user(self, db: AsyncSession, user_id: str, role_id: str) -> [List[UserRoles] | List]:
+        """
+        Function to assign a role to a user.
+        """
+
+        statement = insert(UserRole).values(user_id=user_id, role_id=role_id)
+
+        await db.execute(statement=statement)
+        await db.commit()
+
+        result = await self.get_user_roles(db, user_id)
+
+        return result
 
 
 @lru_cache()
