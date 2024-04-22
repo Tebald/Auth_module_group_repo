@@ -87,7 +87,7 @@ class UserRoles(BaseModel):
 class UserRolesResp(BaseModel):
     user_id: str
     user_name: str
-    roles: UserRoles | List
+    roles: List[UserRoles] | List
 
 
 class UserLoginHistoryResp(BaseModel):

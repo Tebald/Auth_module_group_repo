@@ -1,6 +1,7 @@
 from typing import Annotated, Dict
 
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
@@ -99,6 +100,7 @@ async def login_user_for_access_token_cookie(
     response: Response,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: AsyncSession = Depends(get_pg_session),
+    base_service: BaseService = Depends(get_base_service),
     authentication_service: AuthenticationService = Depends(get_authentication_service)
 ):
     """
@@ -106,10 +108,8 @@ async def login_user_for_access_token_cookie(
     """
     try:
         user = await authentication_service.authenticate_user(db, form_data.username, form_data.password)
-        user_roles = []
-        # ToDo retrieve roles info from the db.
-
-    except Exception:
+    except Exception as excp:
+        logging.error('Unable to get user %s. The following error occured: %s', form_data.username, excp)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='internal server error')
 
     if not user:
@@ -117,6 +117,14 @@ async def login_user_for_access_token_cookie(
 
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='user is inactive')
+
+    try:
+        user_roles_list = await base_service.get_user_roles(db, user.id)
+        user_roles = [jsonable_encoder(role) for role in user_roles_list]
+
+    except Exception as excp:
+        logging.error('Unable to get roles for user %s. The following error occured: %s', form_data.username, excp)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='internal server error')
 
     access_token, refresh_token = await authentication_service.get_tokens(user_id=str(user.id), user_roles=user_roles)
 
