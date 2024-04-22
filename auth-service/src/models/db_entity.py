@@ -45,6 +45,10 @@ class User(UUIDMixin, Base):
     async def check_password(self, password: str) -> bool:
         return check_password_hash(self.hashed_password, password)
 
+    @staticmethod
+    async def get_password_hashed(password) -> str:
+        return generate_password_hash(password)
+
     def __repr__(self) -> str:
         return f'<User {self.email}>'
 

@@ -1,18 +1,26 @@
 import datetime
 import uuid
 from typing import List
+from pydantic import EmailStr
 
-from fastapi import HTTPException
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, UUID4
 
 
 class UserRegistrationReq(BaseModel):
-    email: str
+    email: EmailStr
+    password: str
+
+
+class UserResetEmailReq(BaseModel):
+    email: EmailStr
+
+
+class UserResetPasswordReq(BaseModel):
     password: str
 
 
 class UserLoginReq(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 
@@ -24,43 +32,44 @@ class UserRegisteredResp(BaseModel):
     is_active: bool
 
 
-class BadRequestLoginResp(BaseModel):
-    result: str
-    error: str
+class ResetCredentialsResp(BaseModel):
+    result: str = 'success'
+    user_id: str
+    field: str
+    value: str | None = None
 
 
-class BadRequestResp(BaseModel):
-    detail: str
-
-
-class InternalServerErrResp(BaseModel):
-    detail: str
-
-
-class ResetCredentialsBadReqResp(BaseModel):
-    result: str
-    message: str
-
-
-class UserLoginCookie(BaseModel):
-    access_token: str
-    refresh_token: str
-
-
-class UnauthorisedResp(BaseModel):
-    detail: str
+class ResetPasswordResp(BaseModel):
+    result: str = 'success'
+    user_id: str
+    field: str = 'password'
 
 
 class UserAccountInfoResp(BaseModel):
-    result: str
-    data: str
-    id: str
+    id: UUID4
     email: str
 
 
+class UserLoginHistory(BaseModel):
+    timestamp: datetime.datetime | None = None
+    ip_address: str | None = None
+    location: str | None = None
+    user_agent: str | None = None
+
+
+class UserRoles(BaseModel):
+    id: UUID4
+    name: str
+
+
+class UserRolesResp(BaseModel):
+    user_id: str
+    user_name: str
+    roles: List[UserRoles] | List
+
+
 class UserLoginHistoryResp(BaseModel):
-    result: str
-    data: List[dict]
+    data: List[UserLoginHistory]
 
 
 class UserPermissionsResp(BaseModel):
@@ -75,15 +84,19 @@ class UserAddRoleResp(BaseModel):
     user_id: str
     roles: List[dict]
 
+
 class PermissionInfoResp(BaseModel):
     permission_id: str
     name: str
 
+
 class PermissionsListResp(BaseModel):
     data: List[PermissionInfoResp]
 
+
 class PermissionCreateResp(PermissionInfoResp):
     ...
+
 
 class PermissionCreateReq(BaseModel):
     name: str
@@ -132,8 +145,10 @@ class RefreshTokenData(BaseModel):
 class RolesListResp(BaseModel):
     data: List[RoleInfoResp]
 
+
 class RoleCreateResp(RoleInfoResp):
     ...
+
 
 class RoleCreateReq(BaseModel):
     name: str
