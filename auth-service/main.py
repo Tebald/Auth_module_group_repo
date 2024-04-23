@@ -32,8 +32,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     lifespan=lifespan,
     title=settings.project_name,
-    docs_url='/auth_api/openapi',
-    openapi_url='/auth_api/openapi.json',
+    docs_url='/api/openapi',
+    openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
     description='Auth API endpoints',
     version='1.0.0'
