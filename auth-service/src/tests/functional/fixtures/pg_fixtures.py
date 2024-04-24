@@ -6,38 +6,77 @@ import uuid
 from datetime import UTC, datetime
 
 from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, String,
-                        UniqueConstraint)
+                        UniqueConstraint, insert)
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlalchemy.orm import DeclarativeBase
 
-from tests.functional.settings import test_base_settings as settings
+from src.tests.functional.settings import test_base_settings as settings
 
 
 dsn = f'postgresql+asyncpg://{settings.pg_user}:{settings.pg_password}@{settings.pg_host}:{settings.pg_port}/{settings.pg_db}'
-engine = create_async_engine(dsn, echo=True, future=True)
+engine = create_async_engine(dsn, echo=False, future=True)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
-@pytest_asyncio.fixture(name='postgres_session', scope='session')
-@backoff.on_exception(backoff.expo, Exception, max_time=30, jitter=backoff.random_jitter)
-async def get_pg_session() -> AsyncSession:
+@pytest_asyncio.fixture(name='db_session', scope='session')
+# @backoff.on_exception(backoff.expo, Exception, max_time=30, jitter=backoff.random_jitter)
+async def db_session() -> AsyncSession:
     async with async_session() as session:
         yield session
 
 
 @pytest_asyncio.fixture(name='pg_create_tables')
-@backoff.on_exception(backoff.expo, Exception, max_time=30, jitter=backoff.random_jitter)
-async def create_database() -> None:
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+async def pg_create_tables():
+    # @backoff.on_exception(backoff.expo, Exception, max_time=30, jitter=backoff.random_jitter)
+    async def inner():
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
+    return inner
 
 
 @pytest_asyncio.fixture(name='pg_clear_all')
-@backoff.on_exception(backoff.expo, Exception, max_time=30, jitter=backoff.random_jitter)
-async def purge_database() -> None:
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+# @backoff.on_exception(backoff.expo, Exception, max_time=30, jitter=backoff.random_jitter)
+async def pg_clear_all():
+    async def inner():
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+
+    return inner
+
+
+@pytest_asyncio.fixture(name='pg_insert_table_data')
+def pg_insert_table_data():
+    # @backoff.on_exception(backoff.expo, Exception, max_time=30, jitter=backoff.random_jitter)
+    async def inner(table_name, data: dict):
+        async with engine.begin() as conn:
+
+            statement = (
+                insert(table_name).
+                values(**data)
+            )
+            await conn.execute(statement=statement)
+            await conn.commit()
+
+    return inner
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class Base(DeclarativeBase):
