@@ -40,6 +40,7 @@ async def pg_create_tables():
 # @backoff.on_exception(backoff.expo, Exception, max_time=30, jitter=backoff.random_jitter)
 async def pg_clear_all():
     async def inner():
+        # print(f'CURRENT FOLDER: {settings.current_folder}')
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
 
