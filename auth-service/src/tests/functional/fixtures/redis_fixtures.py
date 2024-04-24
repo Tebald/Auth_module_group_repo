@@ -2,10 +2,10 @@ import pytest_asyncio
 from redis.asyncio import Redis
 import backoff
 
-from tests.functional.settings import test_base_settings
+from src.tests.functional.settings import test_base_settings
 
 
-@pytest_asyncio.fixture(name='redis_client', scope='session')
+@pytest_asyncio.fixture(name='redis_client')
 async def redis_client() -> Redis:
     @backoff.on_exception(backoff.expo, Exception, max_time=30, jitter=backoff.random_jitter)
     async def get_redis_client():

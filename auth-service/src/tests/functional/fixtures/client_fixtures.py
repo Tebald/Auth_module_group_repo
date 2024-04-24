@@ -2,10 +2,10 @@ import pytest_asyncio
 import aiohttp
 import backoff
 
-from tests.functional.settings import test_base_settings
+from src.tests.functional.settings import test_base_settings
 
 
-@pytest_asyncio.fixture(name='client_session', scope='session')
+@pytest_asyncio.fixture(name='client_session')
 async def client_session() -> aiohttp.ClientSession:
     session = aiohttp.ClientSession()
     yield session
