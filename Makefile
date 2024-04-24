@@ -7,14 +7,20 @@ prod-up:
 prod-down:
 	@docker compose down
 
+local-up:
+	@docker compose -f docker-compose.local.yml up -d
+
+local-down:
+	@docker compose -f docker-compose.local.yml down
+
 tests-up:
 	@docker compose -f docker-compose.tests.yml up -d --build
 
 tests-down:
 	@docker compose -f docker-compose.tests.yml down
 
-local-up:
-	@docker compose -f docker-compose.local.yml up -d
+tests-local-up:
+	@docker compose -f docker-compose.tests.local.yml up -d --build
 
-local-down:
-	@docker compose -f docker-compose.local.yml down
+tests-local-down:
+	@docker compose -f docker-compose.tests.local.yml down
