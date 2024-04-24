@@ -36,16 +36,15 @@ def api_make_post_request(client_session):
     # @backoff.on_exception(backoff.expo, Exception, max_time=30, jitter=backoff.random_jitter)
     async def inner(query_data: dict, endpoint: str, headers: dict = None):
         """
-        :param query_data: {'query': 'The Star', 'page_number': 1, 'page_size': 50}
-        :param endpoint: '/api/v1/account/{user_id}'
-        :return:
+        Send post request using aiohttp.
         """
         url = f'http://{test_base_settings.service_host}:{test_base_settings.service_port}'
         url += endpoint
         async with client_session.post(url, data=query_data, headers=headers) as response:
             body = await response.json()
             status = response.status
-        return status, body
+            rsp_headers = response.headers
+        return status, body, rsp_headers
 
     return inner
 

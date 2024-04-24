@@ -40,11 +40,54 @@ async def test_login_endpoint(
         data = await user_login_data()
         await pg_insert_table_data(table_name=User, data=data)
 
-        status, body = await api_make_post_request(
+        status, _, _ = await api_make_post_request(
             query_data=query_data,
             endpoint='/api/v1/login',
             )
 
         assert status == expected_status
+    finally:
+        await pg_clear_all()
+
+
+@pytest.mark.parametrize('query_data, expected_status', [
+    ({'username': 'admin@mail.com', 'password': '123qwe'}, HTTPStatus.OK),
+
+])
+@pytest.mark.asyncio
+async def test_response_cookies_login_endpoint(
+        pg_create_tables,
+        pg_clear_all,
+        user_login_data,
+        pg_insert_table_data,
+        api_make_post_request, query_data, expected_status):
+    """
+    Test for /api/v1/login endpoint.
+    Adding one valid user into the DB and then trying to log in.
+    Checking if we received necessary Cookie in the response.
+    """
+
+    await pg_create_tables()
+
+    try:
+        data = await user_login_data()
+        await pg_insert_table_data(table_name=User, data=data)
+
+        status, _, headers = await api_make_post_request(
+            query_data=query_data,
+            endpoint='/api/v1/login',
+            )
+
+        assert status == expected_status
+
+        set_cookies = headers.getall('Set-Cookie')
+        # Cheking if there are two Set-Cookie headers in the response
+        assert len(set_cookies) == 2
+        for cookie in set_cookies:
+            # Cheking if Set-Cookie headers contain apropriate token names
+            assert 'auth-app-access-key' in cookie or 'auth-app-refresh-key' in cookie
+            # Cheking if Cookie configured as HttpOnly.
+            assert 'HttpOnly' in cookie
+
     finally:
         await pg_clear_all()
