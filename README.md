@@ -32,6 +32,6 @@
 
 - запустить локально приложение `main.py`
 
-- из папки `/src//tests/functional/` запустить `pytest`
+- из папки `/src/tests/functional/` запустить `pytest`
 
 
