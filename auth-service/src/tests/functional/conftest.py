@@ -5,7 +5,8 @@ import pytest_asyncio
 pytest_plugins = [
     "src.tests.functional.fixtures.redis_fixtures",
     "src.tests.functional.fixtures.client_fixtures",
-    "src.tests.functional.fixtures.pg_fixtures"
+    "src.tests.functional.fixtures.pg_fixtures",
+    "src.tests.functional.fixtures.jwt_fixtures"
 ]
 
 

@@ -13,6 +13,14 @@ from sqlalchemy.orm import DeclarativeBase
 
 from src.tests.functional.settings import test_base_settings as settings
 
+from src.models.db_entity import (
+    User,
+    Role, 
+    Permission, 
+    RolePermission
+)
+from src.db.postgres import Base
+
 
 dsn = f'postgresql+asyncpg://{settings.pg_user}:{settings.pg_password}@{settings.pg_host}:{settings.pg_port}/{settings.pg_db}'
 engine = create_async_engine(dsn, echo=False, future=True)
@@ -63,8 +71,15 @@ def pg_insert_table_data():
     return inner
 
 
-
-
+@pytest_asyncio.fixture(name="super_user")
+async def super_user(db_session):
+    user = User(email="su@example.com", hashed_password="qwerty", is_superuser=True)
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    yield user
+    await db_session.delete(user)
+    await db_session.commit()
 
 
 

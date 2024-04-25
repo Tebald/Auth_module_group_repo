@@ -24,6 +24,8 @@ class TestBaseSettings(BaseSettings):
     service_port: int = Field(8000, env='API_PORT')
     # JWT token
     jwt_secret_key: str = Field(env='JWT_SECRET_KEY')
+    jwt_algorithm: str = Field(env='JWT_ALGORITHM')
+    jwt_at_expire_minutes: int = Field(env='JWT_AT_EXPIRE_MINUTES')
 
     current_folder: str = Field(current_dir)
 
