@@ -3,6 +3,7 @@ from jose import JWTError, jwt
 import pytest_asyncio
 from redis.asyncio import Redis
 from src.tests.functional.settings import test_base_settings
+from src.tests.functional.testdata.jwt_tokens import JWTtokens
 from src.schema.model import AccessTokenData
 
 
@@ -21,3 +22,18 @@ async def get_access_token():
         return encoded_jwt
 
     return _get_access_token
+
+
+@pytest_asyncio.fixture(name='prepare_jwt_tokens')
+def prepare_jwt_tokens():
+    async def inner(token_params: dict):
+        jwt_tokens = JWTtokens()
+        access_token, refresh_token = await jwt_tokens.get_token_pair(
+            user_id='8ab71a54-7b99-4322-a07e-0b2a0c40ff44',
+            session_id='22bd63b2-3d33-45b7-991b-d2e37662426a',
+            **token_params
+        )
+
+        return access_token, refresh_token
+
+    return inner

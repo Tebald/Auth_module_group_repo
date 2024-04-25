@@ -1,9 +1,8 @@
-import json
-import time
-import uuid
 from http import HTTPStatus
 
-from src.tests.functional.settings import test_base_settings
+from src.tests.functional.testdata.jwt_tokens import JWTtokens
+from src.tests.functional.testdata.pg_db_data_input import su_user_data
+from src.tests.functional.fixtures.client_fixtures import api_post, api_make_get_request
 
 from src.models.db_entity import (
     User,
@@ -16,98 +15,118 @@ import pytest
 
 
 @pytest.mark.asyncio
-async def test_add_permission(client_session, super_user, get_access_token):
-    url = f"http://{test_base_settings.service_host}:{test_base_settings.service_port}" \
-          "/api/v1/admin/permissions"
-    permission_name = "permission.1"
-    access_token = await get_access_token(str(super_user.id))
+async def test_add_permission(
+        pg_clear_tables_data,
+        pg_insert_table_data,
+        su_user_data,
+        prepare_jwt_tokens,
+        api_post):
 
-    response = await client_session.post(
-        url, 
-        json={"name": permission_name}, 
-        headers={"cookie": f"auth-app-access-key={access_token}"}
-    )
+    await pg_clear_tables_data()
+    jwt = JWTtokens()
 
-    body = await response.read()
-    headers = response.headers
-    status = response.status
-    res = json.loads(body.decode())
+    try:
+        data = await su_user_data()
+        await pg_insert_table_data(table_name=User, data=data)
+        access_token, refresh_token = await jwt.get_token_pair(
+            user_id=data.get('id'),
+            session_id='22bd63b2-3d33-45b7-991b-d2e37662426a'
+        )
+        status, body, _ = await api_post(
+            body={'name': 'permission.1'},
+            endpoint='/api/v1/admin/permissions',
+            headers={'cookie': f'auth-app-access-key={access_token}'}
+        )
 
-    assert status == HTTPStatus.CREATED
+        assert status == HTTPStatus.CREATED
+    finally:
+        await pg_clear_tables_data()
 
 
 @pytest.mark.asyncio
-async def test_get_permissions(client_session, 
-                               super_user, 
-                               get_access_token, 
-                               pg_insert_table_data,
-                               pg_drop_table_data):
-    url = f"http://{test_base_settings.service_host}:{test_base_settings.service_port}" \
-          "/api/v1/admin/permissions"
-    access_token = await get_access_token(str(super_user.id))
+async def test_get_permissions(
+        client_session,
+        pg_insert_table_data,
+        pg_clear_tables_data,
+        api_make_get_request, su_user_data):
+
+    await pg_clear_tables_data()
+    jwt = JWTtokens()
     permission_name = "permission.ABC"
 
-    await pg_drop_table_data(table_name=Permission)
-    await pg_insert_table_data(table_name=Permission, data={"name": permission_name})
+    try:
+        data = await su_user_data()
+        await pg_insert_table_data(table_name=User, data=data)
+        await pg_insert_table_data(table_name=Permission, data={"name": permission_name})
+        access_token, refresh_token = await jwt.get_token_pair(
+            user_id=data.get('id'),
+            session_id='22bd63b2-3d33-45b7-991b-d2e37662426a'
+        )
+        status, body = await api_make_get_request(
+            endpoint='/api/v1/admin/permissions',
+            headers={'cookie': f'auth-app-access-key={access_token}'}
+        )
 
-    response = await client_session.get(
-        url,
-        headers={"cookie": f"auth-app-access-key={access_token}"}
-    )
-
-    body = await response.read()
-    headers = response.headers
-    status = response.status
-    res = json.loads(body.decode())
-
-    assert status == HTTPStatus.OK
-    assert res['data'][0]['name'] == permission_name
-
-
-@pytest.mark.asyncio
-async def test_add_role(client_session, super_user, get_access_token):
-    url = f"http://{test_base_settings.service_host}:{test_base_settings.service_port}" \
-          "/api/v1/admin/roles"
-    role_name = "role.1"
-    access_token = await get_access_token(str(super_user.id))
-
-    response = await client_session.post(
-        url, 
-        json={"name": role_name}, 
-        headers={"cookie": f"auth-app-access-key={access_token}"}
-    )
-
-    body = await response.read()
-    headers = response.headers
-    status = response.status
-    res = json.loads(body.decode())
-
-    assert status == HTTPStatus.CREATED
+        assert status == HTTPStatus.OK
+        assert body['data'][0]['name'] == permission_name
+    finally:
+        await pg_clear_tables_data()
 
 
 @pytest.mark.asyncio
-async def test_get_roles(client_session, 
-                         super_user, 
-                         get_access_token, 
-                         pg_insert_table_data,
-                         pg_drop_table_data):
-    url = f"http://{test_base_settings.service_host}:{test_base_settings.service_port}" \
-          "/api/v1/admin/roles"
-    access_token = await get_access_token(str(super_user.id))
-    role_name = "role.ABC"
+async def test_add_role(
+        pg_clear_tables_data,
+        pg_insert_table_data,
+        su_user_data,
+        prepare_jwt_tokens,
+        api_post):
 
-    await pg_drop_table_data(table_name=Role)
-    await pg_insert_table_data(table_name=Role, data={"name": role_name})
+    await pg_clear_tables_data()
+    jwt = JWTtokens()
 
-    response = await client_session.get(
-        url,
-        headers={"cookie": f"auth-app-access-key={access_token}"}
-    )
+    try:
+        data = await su_user_data()
+        await pg_insert_table_data(table_name=User, data=data)
+        access_token, refresh_token = await jwt.get_token_pair(
+            user_id=data.get('id'),
+            session_id='22bd63b2-3d33-45b7-991b-d2e37662426a'
+        )
+        status, _, _ = await api_post(
+            body={'name': 'role.1'},
+            endpoint='/api/v1/admin/roles',
+            headers={'cookie': f'auth-app-access-key={access_token}'}
+        )
 
-    body = await response.read()
-    headers = response.headers
-    status = response.status
-    res = json.loads(body.decode())
+        assert status == HTTPStatus.CREATED
+    finally:
+        await pg_clear_tables_data()
 
-    assert status == HTTPStatus.OK
-    assert res['data'][0]['name'] == role_name
+
+@pytest.mark.asyncio
+async def test_get_roles(
+        client_session,
+        pg_insert_table_data,
+        pg_clear_tables_data,
+        api_make_get_request, su_user_data):
+
+    await pg_clear_tables_data()
+    jwt = JWTtokens()
+    role_name = 'role.ABC'
+
+    try:
+        data = await su_user_data()
+        await pg_insert_table_data(table_name=User, data=data)
+        await pg_insert_table_data(table_name=Role, data={"name": role_name})
+        access_token, refresh_token = await jwt.get_token_pair(
+            user_id=data.get('id'),
+            session_id='22bd63b2-3d33-45b7-991b-d2e37662426a'
+        )
+        status, body = await api_make_get_request(
+            endpoint='/api/v1/admin/roles',
+            headers={'cookie': f'auth-app-access-key={access_token}'}
+        )
+
+        assert status == HTTPStatus.OK
+        assert body['data'][0]['name'] == role_name
+    finally:
+        await pg_clear_tables_data()

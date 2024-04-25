@@ -49,27 +49,50 @@ class JWTtokens:
     access_token_expire = 30
     refresh_token_expire = 1440
 
-    async def get_token_pair(self, user_id: str, session_id: str, roles: list = None, ) -> (str, str):
+    async def get_token_pair(
+            self,
+            user_id: str,
+            session_id: str,
+            roles: list = None,
+            secret_key: str = None,
+            access_token_expire: int = None,
+            refresh_token_expire: int = None) -> (str, str):
         """
         Returns a pair of jwt tokens
         """
+
         at_payload = await self.get_access_token_payload(user_id=user_id, roles=roles)
         rt_payload = await self.get_refresh_token_payload(user_id=user_id, roles=roles, session_id=session_id)
-        access_token = await self.generate_token(at_payload, token_expire=self.access_token_expire)
-        refresh_token = await self.generate_token(rt_payload, token_expire=self.refresh_token_expire)
+
+        if not access_token_expire:
+            access_token_expire = self.access_token_expire
+
+        if not refresh_token_expire:
+            refresh_token_expire = self.refresh_token_expire
+
+        if not secret_key:
+            secret_key = self.secret_key
+
+        access_token = await self.generate_token(at_payload, token_expire=access_token_expire, secret_key=secret_key)
+        refresh_token = await self.generate_token(rt_payload, token_expire=refresh_token_expire, secret_key=secret_key)
 
         return access_token, refresh_token
 
-    async def generate_token(self, token_payload: [AccessTokenData or RefreshTokenData], token_expire: int) -> str:
+    async def generate_token(
+            self,
+            token_payload: [AccessTokenData or RefreshTokenData],
+            token_expire: int,
+            secret_key: str) -> str:
         """
         Generates a jwt token
         """
 
         token_payload.exp = datetime.utcnow() + timedelta(minutes=token_expire)
+
         to_encode = dict(token_payload)
 
         logging.info('Issued token: %s', to_encode)
-        encoded_jwt = jwt.encode(to_encode, self.secret_key, self.algorithm)
+        encoded_jwt = jwt.encode(to_encode, secret_key, self.algorithm)
 
         return encoded_jwt
 
