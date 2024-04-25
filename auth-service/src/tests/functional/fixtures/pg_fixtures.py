@@ -6,7 +6,7 @@ import uuid
 from datetime import UTC, datetime
 
 from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, String,
-                        UniqueConstraint, insert)
+                        UniqueConstraint, insert, delete)
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlalchemy.orm import DeclarativeBase
@@ -60,10 +60,22 @@ def pg_insert_table_data():
     # @backoff.on_exception(backoff.expo, Exception, max_time=30, jitter=backoff.random_jitter)
     async def inner(table_name, data: dict):
         async with engine.begin() as conn:
-
             statement = (
-                insert(table_name).
-                values(**data)
+                insert(table_name).values(**data)
+            )
+            await conn.execute(statement=statement)
+            await conn.commit()
+
+    return inner
+
+
+@pytest_asyncio.fixture(name='pg_drop_table_data')
+def pg_drop_table_data():
+    # @backoff.on_exception(backoff.expo, Exception, max_time=30, jitter=backoff.random_jitter)
+    async def inner(table_name):
+        async with engine.begin() as conn:
+            statement = (
+                delete(table_name)
             )
             await conn.execute(statement=statement)
             await conn.commit()
