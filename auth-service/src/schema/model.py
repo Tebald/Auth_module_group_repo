@@ -56,6 +56,14 @@ class UserLoginHistory(BaseModel):
     user_agent: str | None = None
 
 
+class UserLoginHistoryResp(BaseModel):
+    page: int
+    total_pages: int
+    total_entries: int
+    per_page: int
+    data: List[UserLoginHistory]
+
+
 class UserRoles(BaseModel):
     id: UUID4
     name: str
@@ -65,10 +73,6 @@ class UserRolesResp(BaseModel):
     user_id: str
     user_name: str
     roles: List[UserRoles] | List
-
-
-class UserLoginHistoryResp(BaseModel):
-    data: List[UserLoginHistory]
 
 
 class UserPermissionsResp(BaseModel):

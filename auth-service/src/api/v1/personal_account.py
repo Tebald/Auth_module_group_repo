@@ -1,5 +1,9 @@
+from math import ceil
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import UUID4
+from sqlalchemy import asc, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.v1.authentication import (check_access_token,
@@ -11,6 +15,7 @@ from src.schema.model import (AccessTokenData, ResetCredentialsResp,
                               UserLoginHistoryResp, UserResetEmailReq,
                               UserResetPasswordReq)
 from src.services.base import BaseService, get_base_service
+from src.services.pagination import Pagination, SortEnum, pagination_params
 
 router = APIRouter()
 
@@ -49,18 +54,29 @@ async def get_user_account_info(
             response_model=UserLoginHistoryResp,
             description='Details regarding user login history')
 async def get_user_login_history_info(
+        pagination: Annotated[Pagination, Depends(pagination_params)],
         user_id: UUID4,
         db: AsyncSession = Depends(get_pg_session),
         base_service: BaseService = Depends(get_base_service),
         db_user: User = Depends(get_current_active_user),
         access_token_dic: dict = Depends(check_access_token)) -> UserLoginHistoryResp:
     """
-    Returns details regarding user account.
+    Returns paginated details regarding user login history.
     """
     await check_user_id(user_id, access_token_dic)
-    login_history = await base_service.get_user_login_history(db, db_user.id)
 
-    return UserLoginHistoryResp(data=login_history)
+    offset = pagination.get_offset()
+    order = desc if pagination.order == SortEnum.DESC else asc
+
+    login_history, count = await base_service.get_user_login_history(
+        db, db_user.id, limit=pagination.per_page, offset=offset, order=order)
+
+    return UserLoginHistoryResp(
+        page=pagination.page,
+        total_pages=ceil(count / pagination.per_page),
+        total_entries=count,
+        per_page=pagination.per_page,
+        data=login_history)
 
 
 @router.put('/account/{user_id}/reset-email',
