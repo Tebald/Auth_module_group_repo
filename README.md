@@ -7,6 +7,16 @@
 После того, как все сервисы стартовали, API доступен по адресу http://127.0.0.1/api/
 Спецификация http://127.0.0.1/api/openapi
 
+Попасть внутрь контейнера с базой (пригодится для выдачи прав суперпользователя или чтобы узнать id юзера для запросов):
+
+`docker exec -it auth_module_group_repo-auth_postgres-1 psql -h 127.0.0.1 -U app -d auth_database`
+
+Выдать права суперпользователя - в табличке `users` обновляем любого существующего пользователя:
+
+`update users set is_superuser=true where email='admin@mail.com';`
+
+
+
 ## Запуск тестов в контейнере
 
 `make tests-up`
