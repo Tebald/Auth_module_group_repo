@@ -4,12 +4,12 @@ from datetime import datetime
 from functools import lru_cache
 
 from fastapi import Depends
+from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import select
-from sqlalchemy import insert
 
 from src.db.redis_db import get_redis
-from src.models.db_entity import User, LoginHistory
+from src.models.db_entity import LoginHistory, User
 from src.schema.model import RefreshTokenData
 from src.services.jwt_token import JWTService, get_jwt_service
 from src.services.redis import RedisService, get_redis_service

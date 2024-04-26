@@ -1,9 +1,8 @@
 import datetime
 import uuid
 from typing import List
-from pydantic import EmailStr
 
-from pydantic import BaseModel, Field, field_validator, UUID4
+from pydantic import UUID4, BaseModel, EmailStr, Field, field_validator
 
 
 class UserRegistrationReq(BaseModel):

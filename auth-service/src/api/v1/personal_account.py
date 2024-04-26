@@ -2,12 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import UUID4
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.v1.authentication import check_access_token, get_current_active_user
+from src.api.v1.authentication import (check_access_token,
+                                       get_current_active_user)
 from src.db.postgres import get_pg_session
-from src.schema.model import UserAccountInfoResp, AccessTokenData, UserLoginHistoryResp, \
-    UserResetEmailReq, ResetCredentialsResp, UserResetPasswordReq, ResetPasswordResp
-from src.services.base import BaseService, get_base_service
 from src.models.db_entity import User
+from src.schema.model import (AccessTokenData, ResetCredentialsResp,
+                              ResetPasswordResp, UserAccountInfoResp,
+                              UserLoginHistoryResp, UserResetEmailReq,
+                              UserResetPasswordReq)
+from src.services.base import BaseService, get_base_service
 
 router = APIRouter()
 

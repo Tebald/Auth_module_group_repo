@@ -1,14 +1,15 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import UUID4
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.v1.authentication import get_superuser
 from src.db.postgres import get_pg_session
+from src.models.db_entity import User
 from src.schema.model import UserRolesResp
 from src.services.base import BaseService, get_base_service
-from src.models.db_entity import User
-import logging
 
 router = APIRouter()
 

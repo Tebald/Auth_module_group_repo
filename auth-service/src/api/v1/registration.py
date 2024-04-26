@@ -1,12 +1,10 @@
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.db.postgres import get_pg_session
-from src.services.registration import RegistrationService, get_registration_service
-from src.schema.model import (
-    UserRegistrationReq,
-    UserRegisteredResp
-)
 
+from src.db.postgres import get_pg_session
+from src.schema.model import UserRegisteredResp, UserRegistrationReq
+from src.services.registration import (RegistrationService,
+                                       get_registration_service)
 
 router = APIRouter()
 

@@ -1,13 +1,14 @@
+import logging
 from functools import lru_cache
 from typing import List
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import select, update, insert, delete
+from sqlalchemy.sql import delete, insert, select, update
 
-from src.models.db_entity import User, LoginHistory, UserRole, Role
-from src.schema.model import UserLoginHistory, ResetCredentialsResp, ResetPasswordResp, UserRoles
-import logging
+from src.models.db_entity import LoginHistory, Role, User, UserRole
+from src.schema.model import (ResetCredentialsResp, ResetPasswordResp,
+                              UserLoginHistory, UserRoles)
 
 
 class BaseService:

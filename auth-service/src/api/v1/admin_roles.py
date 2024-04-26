@@ -1,20 +1,16 @@
-from fastapi import APIRouter, status, Depends, Cookie, HTTPException
+from typing import List
+
+from fastapi import APIRouter, Cookie, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.v1.authentication import get_superuser
-from src.models.db_entity import User
 from src.db.postgres import get_pg_session
+from src.models.db_entity import User
+from src.schema.model import (PermissionCreateReq, PermissionCreateResp,
+                              PermissionInfoResp, PermissionsListResp,
+                              RoleCreateReq, RoleCreateResp, RoleInfoResp,
+                              RolesListResp)
 from src.services.admin_roles import AdminRolesService, get_admin_roles_service
-from src.schema.model import (
-    RoleCreateReq,
-    RolesListResp,
-    RoleCreateResp,
-    PermissionCreateReq,
-    PermissionsListResp,
-    PermissionCreateResp, PermissionInfoResp, RoleInfoResp
-)
-from typing import List
-
 
 router = APIRouter()
 

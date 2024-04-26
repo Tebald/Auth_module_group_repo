@@ -1,6 +1,6 @@
+import backoff
 import pytest_asyncio
 from redis.asyncio import Redis
-import backoff
 
 from src.tests.functional.settings import test_base_settings
 

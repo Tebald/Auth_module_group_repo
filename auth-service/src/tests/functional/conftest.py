@@ -1,6 +1,6 @@
 import asyncio
-import pytest_asyncio
 
+import pytest_asyncio
 
 pytest_plugins = [
     "src.tests.functional.fixtures.redis_fixtures",
