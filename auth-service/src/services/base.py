@@ -2,12 +2,13 @@ from functools import lru_cache
 from typing import List
 
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy import desc, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import select, update, insert, delete
+from sqlalchemy.sql import delete, insert, select, update
 
-from src.models.db_entity import User, LoginHistory, UserRole, Role
-from src.schema.model import UserLoginHistory, ResetCredentialsResp, ResetPasswordResp, UserRoles
-import logging
+from src.models.db_entity import LoginHistory, Role, User, UserRole
+from src.schema.model import (ResetCredentialsResp,
+                              ResetPasswordResp, UserLoginHistory, UserRoles)
 
 
 class BaseService:
@@ -64,21 +65,41 @@ class BaseService:
         return user is not None
 
     @staticmethod
-    async def get_user_login_history(db: AsyncSession, user_id: str, limit: int = 30) -> [List[LoginHistory] | None]:
+    async def get_user_login_history(
+            db: AsyncSession,
+            user_id: str,
+            limit: int = 50,
+            offset: int = 0,
+            order=desc
+    ) -> [List[UserLoginHistory], int]:
         """
         Searching for a user login history in DB.
-        Returns last 30 search results.
+        Returns amount of results depending on received pagination parameters.
         """
-        statement = select(LoginHistory).where(LoginHistory.user_id == user_id).limit(limit)
+        statement = (
+            select(LoginHistory)
+            .where(LoginHistory.user_id == user_id)
+            .limit(limit)
+            .offset(offset)
+            .order_by(order(LoginHistory.timestamp))
+        )
         statement_result = await db.execute(statement=statement)
         login_history = statement_result.scalars()
         if not login_history:
-            return None
+            return [], 0
+
+        # Достаем из LoginHistory количество записей с LoginHistory.user_id == user_id
+        count_query = select(func.count()).select_from(
+            select(LoginHistory.user_id)
+            .where(LoginHistory.user_id == user_id).subquery()
+        )
+        count_result = await db.execute(statement=count_query)
+        count = count_result.scalar_one()
 
         # Получили из базы список из LoginHistory (схема БД)
         # берем каждый объект списка, декодируем в dict
         # dict распаковываем в UserLoginHistory - модель которую мы отдаем пользователю.
-        return [UserLoginHistory(**jsonable_encoder(login)) for login in login_history]
+        return [UserLoginHistory(**jsonable_encoder(login)) for login in login_history], count
 
     @staticmethod
     async def update_user_email(db: AsyncSession, email: str, user_id: str) -> ResetCredentialsResp:

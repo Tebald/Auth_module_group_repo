@@ -88,8 +88,8 @@ class UserRole(UUIDMixin, Base):
     """
     __tablename__ = 'user_roles'
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    role_id = Column(UUID(as_uuid=True), ForeignKey("roles.id"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    role_id = Column(UUID(as_uuid=True), ForeignKey("roles.id", ondelete="CASCADE"), nullable=False)
     __table_args__ = (UniqueConstraint('user_id', 'role_id', name='_user_role_unic'),)
 
 
@@ -99,7 +99,7 @@ class LoginHistory(UUIDMixin, Base):
     """
     __tablename__ = 'login_history'
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     timestamp = Column(DateTime)
     ip_address = Column(String(15))
     location = Column(String(255))

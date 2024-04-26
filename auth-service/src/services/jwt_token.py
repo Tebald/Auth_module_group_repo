@@ -6,9 +6,9 @@ from functools import lru_cache
 from fastapi import Depends
 from jose import JWTError, jwt
 
-from src.schema.model import AccessTokenData, RefreshTokenData
 from src.core.api_settings import settings
 from src.db.redis_db import get_redis
+from src.schema.model import AccessTokenData, RefreshTokenData
 
 from .helper import AsyncCache
 

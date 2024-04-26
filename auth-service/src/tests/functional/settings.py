@@ -2,7 +2,8 @@
 Module to store all test settings in one place.
 """
 import os
-from pydantic import Field, ConfigDict
+
+from pydantic import ConfigDict, Field
 from pydantic_settings import BaseSettings
 
 current_dir = os.path.dirname(os.path.abspath(__file__))

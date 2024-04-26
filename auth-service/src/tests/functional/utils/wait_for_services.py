@@ -2,11 +2,9 @@ import asyncio
 
 import backoff
 from redis.asyncio import Redis
-
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from tests.functional.settings import test_base_settings as settings
-
-from sqlalchemy.ext.asyncio import create_async_engine
 
 
 @backoff.on_exception(backoff.expo, Exception, max_time=300, max_tries=10)

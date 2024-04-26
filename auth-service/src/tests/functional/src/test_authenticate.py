@@ -1,12 +1,19 @@
 from http import HTTPStatus
+
 import pytest
 
 from src.tests.functional.fixtures.client_fixtures import api_make_post_request
 from src.tests.functional.fixtures.jwt_fixtures import prepare_jwt_tokens
+from src.tests.functional.fixtures.pg_fixtures import (User,
+                                                       pg_clear_tables_data,
+                                                       pg_insert_table_data)
 from src.tests.functional.testdata.cookies import prepare_cookies
-from src.tests.functional.fixtures.pg_fixtures import User, pg_clear_tables_data, pg_insert_table_data
-from src.tests.functional.testdata.pg_db_data_input import user_login_data  # noqa: F401
 from src.tests.functional.testdata.jwt_tokens import JWTtokens
+from src.tests.functional.testdata.pg_db_data_input import \
+    user_login_data  # noqa: F401
+
+# All test coroutines will be treated as marked.
+pytestmark = pytest.mark.asyncio
 
 
 @pytest.mark.parametrize('query_data, expected_status', [
@@ -18,7 +25,6 @@ from src.tests.functional.testdata.jwt_tokens import JWTtokens
     ({'password': '123qwe'}, HTTPStatus.UNPROCESSABLE_ENTITY),
 
 ])
-@pytest.mark.asyncio
 async def test_login_endpoint(
         pg_clear_tables_data,
         user_login_data,
@@ -49,7 +55,6 @@ async def test_login_endpoint(
     ({'username': 'admin@mail.com', 'password': '123qwe'}, HTTPStatus.OK),
 
 ])
-@pytest.mark.asyncio
 async def test_response_cookies_login_endpoint(
         pg_clear_tables_data,
         user_login_data,
@@ -85,7 +90,6 @@ async def test_response_cookies_login_endpoint(
         await pg_clear_tables_data()
 
 
-@pytest.mark.asyncio
 async def test_response_cookies_logout_endpoint(
         pg_clear_tables_data,
         pg_insert_table_data,
@@ -131,7 +135,6 @@ async def test_response_cookies_logout_endpoint(
     ({}, {'access_token_expire': -15}, HTTPStatus.UNAUTHORIZED),
     ({}, {'refresh_token_expire': -15}, HTTPStatus.UNAUTHORIZED),
 ])
-@pytest.mark.asyncio
 async def test_logout_endpoint_access(
         prepare_jwt_tokens,
         prepare_cookies,
@@ -163,7 +166,6 @@ async def test_logout_endpoint_access(
     ({}, {'secret_key': 'someincorrectsecretkey'}, HTTPStatus.UNAUTHORIZED),
     ({}, {'refresh_token_expire': -15}, HTTPStatus.UNAUTHORIZED),
 ])
-@pytest.mark.asyncio
 async def test_token_refresh_endpoint_access(
         prepare_jwt_tokens,
         prepare_cookies,

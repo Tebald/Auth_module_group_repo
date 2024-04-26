@@ -1,6 +1,6 @@
-import pytest_asyncio
 import aiohttp
 import backoff
+import pytest_asyncio
 
 from src.tests.functional.settings import test_base_settings
 
