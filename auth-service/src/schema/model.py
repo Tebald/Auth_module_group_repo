@@ -1,9 +1,8 @@
 import datetime
 import uuid
 from typing import List
-from pydantic import EmailStr
 
-from pydantic import BaseModel, Field, field_validator, UUID4
+from pydantic import UUID4, BaseModel, EmailStr, Field, field_validator
 
 
 class UserRegistrationReq(BaseModel):
@@ -57,6 +56,14 @@ class UserLoginHistory(BaseModel):
     user_agent: str | None = None
 
 
+class UserLoginHistoryResp(BaseModel):
+    page: int
+    total_pages: int
+    total_entries: int
+    per_page: int
+    data: List[UserLoginHistory]
+
+
 class UserRoles(BaseModel):
     id: UUID4
     name: str
@@ -66,10 +73,6 @@ class UserRolesResp(BaseModel):
     user_id: str
     user_name: str
     roles: List[UserRoles] | List
-
-
-class UserLoginHistoryResp(BaseModel):
-    data: List[UserLoginHistory]
 
 
 class UserPermissionsResp(BaseModel):

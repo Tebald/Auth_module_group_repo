@@ -1,18 +1,20 @@
+import logging
 from typing import Annotated, Dict
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, status
+from fastapi import (APIRouter, Cookie, Depends, HTTPException, Request,
+                     Response, status)
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
-import logging
 
-from src.schema.model import AccessTokenData
 from src.db.postgres import get_pg_session
+from src.models.db_entity import User
 from src.schema.cookie import AccessTokenCookie, RefreshTokenCookie
-from src.services.authentication import AuthenticationService, get_authentication_service
+from src.schema.model import AccessTokenData
+from src.services.authentication import (AuthenticationService,
+                                         get_authentication_service)
 from src.services.base import BaseService, get_base_service
 from src.services.jwt_token import JWTService, get_jwt_service
-from src.models.db_entity import User
 
 router = APIRouter()
 

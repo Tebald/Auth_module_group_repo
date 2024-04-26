@@ -1,29 +1,20 @@
 from functools import lru_cache
-from src.db.redis_db import get_redis
+from typing import Generic, List, Type, TypeVar, Union
+
 from fastapi import Depends, HTTPException, status
-from sqlalchemy.sql import select, delete, insert
-from sqlalchemy import text, and_
-from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
+from sqlalchemy import and_, text
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql import delete, insert, select
 
-from src.schema.model import (
-    RoleCreateReq,
-    RoleCreateResp,
-    RolesListResp,
-    RoleInfoResp,
-    PermissionCreateReq,
-    PermissionCreateResp,
-    PermissionInfoResp,
-    PermissionsListResp
-)
-from src.models.db_entity import (
-    Role, 
-    Permission, 
-    RolePermission
-)
+from src.db.redis_db import get_redis
+from src.models.db_entity import Permission, Role, RolePermission
+from src.schema.model import (PermissionCreateReq, PermissionCreateResp,
+                              PermissionInfoResp, PermissionsListResp,
+                              RoleCreateReq, RoleCreateResp, RoleInfoResp,
+                              RolesListResp)
+
 from .helper import AsyncCache
-from typing import List, Union, Type, TypeVar, Generic
-
 
 T = TypeVar('T')
 

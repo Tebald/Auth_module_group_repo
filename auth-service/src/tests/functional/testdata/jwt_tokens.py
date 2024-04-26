@@ -3,10 +3,9 @@ import uuid
 from datetime import datetime, timedelta
 
 from jose import jwt
+from pydantic import BaseModel, field_validator
 
 from src.tests.functional.settings import test_base_settings as settings
-
-from pydantic import BaseModel, field_validator
 
 
 class AccessTokenData(BaseModel):

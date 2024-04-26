@@ -6,11 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import select
 
 from src.db.redis_db import get_redis
-from src.schema.model import (
-    UserRegistrationReq,
-    UserRegisteredResp
-)
 from src.models.db_entity import User
+from src.schema.model import UserRegisteredResp, UserRegistrationReq
 
 from .helper import AsyncCache
 
@@ -51,7 +48,7 @@ class RegistrationService:
         await db.commit()
         await db.refresh(user)
         return UserRegisteredResp(
-            result='TBD',
+            result='success',
             user_id=str(user.id),
             email=user.email,
             is_active=user.is_active

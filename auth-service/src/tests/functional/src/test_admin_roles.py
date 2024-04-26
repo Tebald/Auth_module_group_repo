@@ -1,20 +1,17 @@
 from http import HTTPStatus
 
-from src.tests.functional.testdata.jwt_tokens import JWTtokens
-from src.tests.functional.testdata.pg_db_data_input import su_user_data
-from src.tests.functional.fixtures.client_fixtures import api_post, api_make_get_request
-
-from src.models.db_entity import (
-    User,
-    Role, 
-    Permission, 
-    RolePermission
-)
-
 import pytest
 
+from src.models.db_entity import Permission, Role, RolePermission, User
+from src.tests.functional.fixtures.client_fixtures import (
+    api_make_get_request, api_post)
+from src.tests.functional.testdata.jwt_tokens import JWTtokens
+from src.tests.functional.testdata.pg_db_data_input import su_user_data
 
-@pytest.mark.asyncio
+# All test coroutines will be treated as marked.
+pytestmark = pytest.mark.asyncio
+
+
 async def test_add_permission(
         pg_clear_tables_data,
         pg_insert_table_data,
@@ -43,7 +40,6 @@ async def test_add_permission(
         await pg_clear_tables_data()
 
 
-@pytest.mark.asyncio
 async def test_get_permissions(
         client_session,
         pg_insert_table_data,
@@ -73,7 +69,6 @@ async def test_get_permissions(
         await pg_clear_tables_data()
 
 
-@pytest.mark.asyncio
 async def test_add_role(
         pg_clear_tables_data,
         pg_insert_table_data,
@@ -102,7 +97,6 @@ async def test_add_role(
         await pg_clear_tables_data()
 
 
-@pytest.mark.asyncio
 async def test_get_roles(
         client_session,
         pg_insert_table_data,

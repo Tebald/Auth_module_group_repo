@@ -6,13 +6,12 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 
-from src.api.v1 import admin_user_permissions
-from src.api.v1 import authentication, registration, admin_roles, personal_account
+from src.api.v1 import (admin_roles, admin_user_permissions, authentication,
+                        personal_account, registration)
 from src.core.api_settings import settings
 from src.core.logger import setup_logging
 from src.db import redis_db
 from src.models.db_entity import create_database, purge_database
-
 
 setup_logging()
 
