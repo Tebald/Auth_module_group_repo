@@ -1,12 +1,32 @@
+import calendar
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, date, timedelta
 
 from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, String,
-                        UniqueConstraint)
+                        UniqueConstraint, text, PrimaryKeyConstraint)
 from sqlalchemy.dialects.postgresql import UUID
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from src.db.postgres import Base, engine
+
+
+def create_partition(target, connection, **kw) -> None:
+    """creating partition by authentication_date"""
+    start_date = date(2024, 1, 15)
+    end_date = date(2026, 1, 1)
+
+    while start_date < end_date:
+        year_month = start_date.strftime('%Y_%m')
+        month_start = start_date.replace(day=1)
+        month_end = start_date.replace(day=calendar.monthrange(start_date.year, start_date.month)[1])
+        connection.execute(
+            text(
+                f"""CREATE TABLE IF NOT EXISTS "{LoginHistory.__tablename__}_{year_month}" 
+                PARTITION OF "{LoginHistory.__tablename__}" 
+                FOR VALUES FROM ('{month_start}') TO ('{month_end}')"""
+            )
+        )
+        start_date += timedelta(days=30)
 
 
 class UUIDMixin:
@@ -93,12 +113,20 @@ class UserRole(UUIDMixin, Base):
     __table_args__ = (UniqueConstraint('user_id', 'role_id', name='_user_role_unic'),)
 
 
-class LoginHistory(UUIDMixin, Base):
+class LoginHistory(Base):
     """
     Class to represent DB 'login_history' table data model
     """
     __tablename__ = 'login_history'
+    __table_args__ = (
+        PrimaryKeyConstraint('id', 'timestamp'),
+        {
+            'postgresql_partition_by': 'Range (timestamp)',
+            'listeners': [('after_create', create_partition)],
+        },
+    )
 
+    id = Column(UUID(as_uuid=True), default=uuid.uuid4, nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     timestamp = Column(DateTime)
     ip_address = Column(String(15))
