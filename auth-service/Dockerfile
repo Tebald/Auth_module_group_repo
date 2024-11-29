@@ -24,8 +24,10 @@ ENTRYPOINT [ "gunicorn", "main:app", "--worker-class", "uvicorn.workers.UvicornW
 FROM base as tests
 
 COPY --from=base /app /app
-COPY tests tests
-ENV PYTHONPATH /app
-RUN chmod 774 ./tests/functional/utils/tests_entrypoint.sh
+COPY src ./src
 
-ENTRYPOINT [ "./tests/functional/utils/tests_entrypoint.sh" ]
+ENV PYTHONPATH /app
+RUN chmod 774 /app/src/tests/functional/utils/tests_entrypoint.sh
+
+ENTRYPOINT [ "/app/src/tests/functional/utils/tests_entrypoint.sh" ]
+

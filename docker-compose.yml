@@ -42,7 +42,7 @@ services:
       context: ./auth-service
       target: prod
     volumes:
-      - .env:/.env:ro
+      - .env:/app/src/core/.env:ro
     expose:
       - ${API_PORT}
     environment:
