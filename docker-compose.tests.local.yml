@@ -7,6 +7,8 @@ services:
       POSTGRES_USER: ${PG_USER}
       POSTGRES_PASSWORD: ${PG_PASSWORD}
       PGPORT: ${PG_PORT}
+    volumes:
+      - pg_test_auth_data:/var/lib/postgresql/data
     expose:
       - ${PG_PORT}
     ports:
@@ -26,3 +28,5 @@ services:
     healthcheck:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
 
+volumes:
+  pg_test_auth_data:
